@@ -24,15 +24,19 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* App background: warm terracotta/clay base + organic leaf-vine texture.
-   Emerald linework pops against the warmer base for contrast. */
+/* App background: full-bleed photo, heavily tinted so cards/text stay
+   readable — same linear-gradient(tint), url(photo) layering trick as
+   HeroBanner.tsx. Photo goes in /public/images/app-bg.jpg (add it yourself,
+   see public/images/README.md). Falls back to flat clay tint if missing. */
 .app-bg {
   background-color: #F3E2D0;
   background-image:
-    radial-gradient(circle at 85% 0%, rgba(196, 98, 45, 0.10), transparent 50%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' viewBox='0 0 260 260'%3E%3Cg fill='none' stroke='%231B4332' stroke-width='1.4' opacity='0.06'%3E%3Cpath d='M20 40 Q40 10 70 25 Q60 45 20 40Z'/%3E%3Cpath d='M45 32 Q45 20 45 10' stroke-width='1'/%3E%3Cpath d='M150 70 Q180 45 210 65 Q195 90 150 70Z'/%3E%3Cpath d='M180 62 Q180 48 178 35' stroke-width='1'/%3E%3Cpath d='M30 150 Q60 130 85 155 Q65 175 30 150Z'/%3E%3Cpath d='M60 148 Q58 132 55 120' stroke-width='1'/%3E%3Cpath d='M170 190 Q195 165 225 182 Q212 205 170 190Z'/%3E%3Cpath d='M198 182 Q198 168 195 155' stroke-width='1'/%3E%3Cpath d='M100 220 Q10 200 -30 240' stroke-width='1'/%3E%3Cpath d='M120 0 Q140 40 110 70' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E");
-  background-attachment: fixed, fixed;
-  background-size: auto, 260px 260px;
+    linear-gradient(rgba(243, 226, 208, 0.93), rgba(243, 226, 208, 0.93)),
+    url("/images/app-bg.jpg");
+  background-blend-mode: normal;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }
 
 /* Hides the scrollbar on the navbar's inner scroll strip (Chrome/Safari/Edge —
