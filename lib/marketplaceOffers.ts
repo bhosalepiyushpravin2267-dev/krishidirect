@@ -3,7 +3,8 @@
 export type OfferStatus =
     | "pending"
     | "accepted"
-    | "rejected";
+    | "rejected"
+    | "cancelled";
 
 export type DealStage =
     | "offer-received"
@@ -37,34 +38,41 @@ export interface MarketplaceOffer {
     createdAt: string;
 }
 
-const STORAGE_KEY = "krishidirect-marketplace-offers";
+const STORAGE_KEY =
+    "krishidirect-marketplace-offers";
 
-/**
- * Get all offers stored in the browser.
- */
+/* -------------------------------------------------------
+   GET ALL OFFERS
+------------------------------------------------------- */
+
 export function getOffers(): MarketplaceOffer[] {
     if (typeof window === "undefined") {
         return [];
     }
 
     try {
-        const stored = localStorage.getItem(STORAGE_KEY);
+        const stored =
+            localStorage.getItem(STORAGE_KEY);
 
         if (!stored) {
             return [];
         }
 
-        return JSON.parse(stored) as MarketplaceOffer[];
-    } catch (error) {
-        console.error("Failed to read marketplace offers:", error);
+        return JSON.parse(
+            stored
+        ) as MarketplaceOffer[];
+    } catch {
         return [];
     }
 }
 
-/**
- * Save a new offer.
- */
-export function saveOffer(offer: MarketplaceOffer): void {
+/* -------------------------------------------------------
+   SAVE NEW OFFER
+------------------------------------------------------- */
+
+export function saveOffer(
+    offer: MarketplaceOffer
+): void {
     if (typeof window === "undefined") {
         return;
     }
@@ -79,13 +87,16 @@ export function saveOffer(offer: MarketplaceOffer): void {
     );
 
     window.dispatchEvent(
-        new Event("krishidirect-offers-updated")
+        new Event(
+            "krishidirect-offers-updated"
+        )
     );
 }
 
-/**
- * Update an existing offer.
- */
+/* -------------------------------------------------------
+   UPDATE OFFER
+------------------------------------------------------- */
+
 export function updateOffer(
     id: string,
     updates: Partial<MarketplaceOffer>
@@ -96,16 +107,15 @@ export function updateOffer(
 
     const offers = getOffers();
 
-    const updatedOffers = offers.map((offer) => {
-        if (offer.id === id) {
-            return {
-                ...offer,
-                ...updates,
-            };
-        }
-
-        return offer;
-    });
+    const updatedOffers =
+        offers.map((offer) =>
+            offer.id === id
+                ? {
+                      ...offer,
+                      ...updates,
+                  }
+                : offer
+        );
 
     localStorage.setItem(
         STORAGE_KEY,
@@ -113,21 +123,94 @@ export function updateOffer(
     );
 
     window.dispatchEvent(
-        new Event("krishidirect-offers-updated")
+        new Event(
+            "krishidirect-offers-updated"
+        )
     );
 }
 
-/**
- * Delete all offers.
- */
+/* -------------------------------------------------------
+   CANCEL OFFER
+------------------------------------------------------- */
+
+export function cancelOffer(
+    id: string
+): void {
+    if (typeof window === "undefined") {
+        return;
+    }
+
+    const offers = getOffers();
+
+    const updatedOffers =
+        offers.map((offer) =>
+            offer.id === id
+                ? {
+                      ...offer,
+                      status: "cancelled" as OfferStatus,
+                  }
+                : offer
+        );
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(updatedOffers)
+    );
+
+    window.dispatchEvent(
+        new Event(
+            "krishidirect-offers-updated"
+        )
+    );
+}
+
+/* -------------------------------------------------------
+   DELETE OFFER
+------------------------------------------------------- */
+
+export function deleteOffer(
+    id: string
+): void {
+    if (typeof window === "undefined") {
+        return;
+    }
+
+    const offers = getOffers();
+
+    const updatedOffers =
+        offers.filter(
+            (offer) =>
+                offer.id !== id
+        );
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(updatedOffers)
+    );
+
+    window.dispatchEvent(
+        new Event(
+            "krishidirect-offers-updated"
+        )
+    );
+}
+
+/* -------------------------------------------------------
+   CLEAR ALL OFFERS
+------------------------------------------------------- */
+
 export function clearOffers(): void {
     if (typeof window === "undefined") {
         return;
     }
 
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(
+        STORAGE_KEY
+    );
 
     window.dispatchEvent(
-        new Event("krishidirect-offers-updated")
+        new Event(
+            "krishidirect-offers-updated"
+        )
     );
 }
