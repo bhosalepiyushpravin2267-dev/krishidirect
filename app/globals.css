@@ -24,3 +24,10 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Hides the scrollbar on the navbar's inner scroll strip (Chrome/Safari/Edge —
+   Firefox and IE are handled inline via scrollbarWidth/msOverflowStyle) while
+   keeping it fully scrollable. Purely cosmetic; doesn't affect touch/wheel input. */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

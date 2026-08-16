@@ -1,0 +1,167 @@
+diff --git a/app/globals.css b/app/globals.css
+index 9159b88..c2a2792 100644
+--- a/app/globals.css
++++ b/app/globals.css
+@@ -23,4 +23,11 @@ body {
+   background: var(--background);
+   color: var(--foreground);
+   font-family: Arial, Helvetica, sans-serif;
++}
++
++/* Hides the scrollbar on the navbar's inner scroll strip (Chrome/Safari/Edge —
++   Firefox and IE are handled inline via scrollbarWidth/msOverflowStyle) while
++   keeping it fully scrollable. Purely cosmetic; doesn't affect touch/wheel input. */
++.scrollbar-hide::-webkit-scrollbar {
++  display: none;
+ }
+\ No newline at end of file
+diff --git a/components/navbar.tsx b/components/navbar.tsx
+index 71998c3..7de8299 100644
+--- a/components/navbar.tsx
++++ b/components/navbar.tsx
+@@ -55,71 +55,87 @@ export default function Navbar({ role, onRoleChange }: NavbarProps) {
+                     </span>
+                 </button>
+ 
+-                <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
+-
+-                    {/* Farmer / Vendor */}
++                <div className="flex min-w-0 flex-1 items-center justify-end gap-1 sm:gap-2">
++
++                    {/*
++                      Farmer/Vendor + Decision Engine share a horizontally-scrollable
++                      strip. On the narrowest phones THIS is what gives way first —
++                      it can scroll internally without changing the row order or
++                      hiding any label. The Language button below sits OUTSIDE this
++                      strip in its own fixed slot, so it is never the thing that gets
++                      clipped or pushed off-screen. Scrollbar is hidden so it doesn't
++                      look any different — it just quietly becomes swipeable if it
++                      ever runs out of room.
++                    */}
+                     <div
+-                        role="tablist"
+-                        aria-label="Switch mode"
+-                        className="relative flex shrink-0 rounded-full bg-[#EFE8D6] p-1 text-xs font-medium sm:text-sm"
++                        className="scrollbar-hide flex min-w-0 flex-1 flex-nowrap items-center gap-1 overflow-x-auto sm:flex-initial sm:gap-2"
++                        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+                     >
+-                        {(["farmer", "vendor"] as UserRole[]).map((r) => (
+-                            <button
+-                                key={r}
+-                                role="tab"
+-                                aria-selected={role === r && !isDecisionEngine}
+-                                onClick={() => {
+-                                    onRoleChange(r);
+-                                    router.push("/");
+-                                }}
+-                                className={cn(
+-                                    "relative z-10 rounded-full px-2.5 py-1.5 capitalize transition-colors sm:px-3.5",
+-                                    role === r && !isDecisionEngine
+-                                        ? "text-[#FBF7EF]"
+-                                        : "text-[#3D4A42] hover:text-[#1B4332]"
+-                                )}
+-                            >
+-                                {role === r && !isDecisionEngine && (
+-                                    <motion.span
+-                                        layoutId="role-pill"
+-                                        className="absolute inset-0 -z-10 rounded-full bg-[#1B4332]"
+-                                        transition={{
+-                                            type: "spring",
+-                                            stiffness: 400,
+-                                            damping: 30,
+-                                        }}
+-                                    />
+-                                )}
++                        {/* Farmer / Vendor */}
++                        <div
++                            role="tablist"
++                            aria-label="Switch mode"
++                            className="relative flex shrink-0 rounded-full bg-[#EFE8D6] p-1 text-xs font-medium sm:text-sm"
++                        >
++                            {(["farmer", "vendor"] as UserRole[]).map((r) => (
++                                <button
++                                    key={r}
++                                    role="tab"
++                                    aria-selected={role === r && !isDecisionEngine}
++                                    onClick={() => {
++                                        onRoleChange(r);
++                                        router.push("/");
++                                    }}
++                                    className={cn(
++                                        "relative z-10 whitespace-nowrap rounded-full px-2.5 py-1.5 capitalize transition-colors sm:px-3.5",
++                                        role === r && !isDecisionEngine
++                                            ? "text-[#FBF7EF]"
++                                            : "text-[#3D4A42] hover:text-[#1B4332]"
++                                    )}
++                                >
++                                    {role === r && !isDecisionEngine && (
++                                        <motion.span
++                                            layoutId="role-pill"
++                                            className="absolute inset-0 -z-10 rounded-full bg-[#1B4332]"
++                                            transition={{
++                                                type: "spring",
++                                                stiffness: 400,
++                                                damping: 30,
++                                            }}
++                                        />
++                                    )}
+ 
+-                                {r === "farmer"
+-                                    ? t("nav.farmer")
+-                                    : t("nav.vendor")}
+-                            </button>
+-                        ))}
+-                    </div>
++                                    {r === "farmer"
++                                        ? t("nav.farmer")
++                                        : t("nav.vendor")}
++                                </button>
++                            ))}
++                        </div>
+ 
+-                    {/* Decision Engine */}
+-                    <button
+-                        onClick={() => router.push("/decision-engine")}
+-                        className={cn(
+-                            "flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold transition-all sm:px-4 sm:text-sm",
+-                            isDecisionEngine
+-                                ? "bg-[#E8A33D] text-[#1B4332] shadow-sm"
+-                                : "border border-[#E4DCC8] bg-white text-[#1B4332] hover:border-[#1B4332]"
+-                        )}
+-                    >
+-                        <Brain className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
++                        {/* Decision Engine */}
++                        <button
++                            onClick={() => router.push("/decision-engine")}
++                            className={cn(
++                                "flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-2 text-xs font-semibold transition-all sm:px-4 sm:text-sm",
++                                isDecisionEngine
++                                    ? "bg-[#E8A33D] text-[#1B4332] shadow-sm"
++                                    : "border border-[#E4DCC8] bg-white text-[#1B4332] hover:border-[#1B4332]"
++                            )}
++                        >
++                            <Brain className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+ 
+-                        <span className="hidden sm:inline">
+-                            Decision Engine
+-                        </span>
++                            <span className="hidden sm:inline">
++                                Decision Engine
++                            </span>
+ 
+-                        <span className="sm:hidden">
+-                            Engine
+-                        </span>
+-                    </button>
++                            <span className="sm:hidden">
++                                Engine
++                            </span>
++                        </button>
++                    </div>
+ 
+-                    {/* Language */}
++                    {/* Language — always in its own fixed slot, outside the
++                        scroll strip, so it stays fully visible no matter what. */}
+                     <div className="relative shrink-0">
+                         <button
+                             onClick={() => setLangOpen((v) => !v)}
