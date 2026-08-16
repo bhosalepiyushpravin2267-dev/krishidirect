@@ -9,7 +9,10 @@ import Navbar from "@/components/navbar";
 import ImpactStats from "@/components/ImpactStats";
 import VendorMarketplaceFeed from "@/components/VendorMarketplaceFeed";
 import CropListingModal from "@/components/CropListingModal";
+<<<<<<< HEAD
 import HeroBanner from "@/components/HeroBanner";
+=======
+>>>>>>> d373f517c5a2cffbab982068f92657e7f5564950
 
 import { useTranslation } from "@/lib/i18n";
 import type {
@@ -240,7 +243,11 @@ export default function DashboardPage() {
   // -------------------------------------------------------------------------
 
   return (
+<<<<<<< HEAD
     <div className="min-h-screen w-full max-w-full overflow-x-hidden">
+=======
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#FBF7EF]">
+>>>>>>> d373f517c5a2cffbab982068f92657e7f5564950
 
       {/* NAVBAR */}
       <Navbar
@@ -263,6 +270,7 @@ export default function DashboardPage() {
 
         {role === "vendor" ? (
           <>
+<<<<<<< HEAD
             <div className="mb-5">
               <HeroBanner
                 imageSrc="/images/vendor-hero.jpg"
@@ -272,6 +280,11 @@ export default function DashboardPage() {
                 subtitle={t("dashboard.vendorHeroSubtitle")}
               />
             </div>
+=======
+            <h1 className="mb-4 font-serif text-2xl font-semibold text-[#1B4332]">
+              {t("dashboard.freshNearYou")}
+            </h1>
+>>>>>>> d373f517c5a2cffbab982068f92657e7f5564950
 
             <VendorMarketplaceFeed
               listings={listings}
@@ -285,6 +298,7 @@ export default function DashboardPage() {
 
           <div className="w-full">
 
+<<<<<<< HEAD
             {/* Farmer welcome hero */}
             <HeroBanner
               imageSrc="/images/farmer-hero.jpg"
@@ -293,11 +307,29 @@ export default function DashboardPage() {
               title={t("dashboard.heroTitle")}
               subtitle={t("dashboard.heroDescription")}
             >
+=======
+            {/* Farmer welcome card */}
+            <div className="rounded-3xl border border-dashed border-[#E4DCC8] bg-white p-6 text-center sm:p-10">
+
+              <h1 className="mb-2 font-serif text-2xl font-semibold text-[#1B4332]">
+                {t("dashboard.heroTitle")}
+              </h1>
+
+              <p className="mx-auto mb-6 max-w-sm text-sm text-[#8A8370]">
+                {t("dashboard.heroDescription")}
+              </p>
+
+              {/* Post Harvest */}
+>>>>>>> d373f517c5a2cffbab982068f92657e7f5564950
               <button
                 onClick={() =>
                   setModalOpen(true)
                 }
+<<<<<<< HEAD
                 className="inline-flex items-center gap-2 rounded-2xl bg-[#E8A33D] px-6 py-3.5 text-sm font-semibold text-[#1B4332] shadow-lg transition-transform active:scale-[0.98]"
+=======
+                className="inline-flex items-center gap-2 rounded-2xl bg-[#1B4332] px-6 py-3.5 text-sm font-semibold text-[#FBF7EF] shadow-lg transition-transform active:scale-[0.98]"
+>>>>>>> d373f517c5a2cffbab982068f92657e7f5564950
               >
                 <Plus className="h-4 w-4" />
 
@@ -305,7 +337,12 @@ export default function DashboardPage() {
                   "dashboard.postNewHarvest"
                 )}
               </button>
+<<<<<<< HEAD
             </HeroBanner>
+=======
+
+            </div>
+>>>>>>> d373f517c5a2cffbab982068f92657e7f5564950
 
             {/* ============================================================ */}
             {/* FARMER OFFERS BUTTON                                         */}
