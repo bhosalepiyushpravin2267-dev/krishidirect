@@ -29,6 +29,7 @@ const en = {
 
     // ---------------- DASHBOARD ----------------
     "dashboard.freshNearYou": "Fresh near you",
+    "dashboard.vendorHeroSubtitle": "Sourced this morning, straight from the field — no middleman markup.",
     "dashboard.heroTitle": "Your harvest, straight to buyers",
     "dashboard.heroDescription":
         "List what you've harvested in under a minute. Nearby vendors see it instantly — no middleman, no waiting.",
@@ -213,6 +214,7 @@ const hi: Record<TranslationKey, string> = {
 
     // DASHBOARD
     "dashboard.freshNearYou": "आपके पास ताज़ा",
+    "dashboard.vendorHeroSubtitle": "आज सुबह की ताज़ी उपज, सीधे खेत से — कोई बिचौलिया मार्कअप नहीं।",
     "dashboard.heroTitle": "आपकी फसल, सीधे खरीदारों तक",
     "dashboard.heroDescription":
         "एक मिनट से भी कम समय में अपनी फसल सूचीबद्ध करें। आस-पास के विक्रेता इसे तुरंत देखेंगे — कोई बिचौलिया नहीं, कोई इंतज़ार नहीं।",
@@ -377,6 +379,7 @@ const mr: Record<TranslationKey, string> = {
 
     // DASHBOARD
     "dashboard.freshNearYou": "तुमच्या जवळचा ताजा माल",
+    "dashboard.vendorHeroSubtitle": "आजच्या सकाळचा ताजा माल, थेट शेतातून — दलालाचा मार्कअप नाही.",
     "dashboard.heroTitle": "तुमचे पीक, थेट खरेदीदारांपर्यंत",
     "dashboard.heroDescription":
         "एका मिनिटापेक्षा कमी वेळात तुमचे पीक नोंदवा. जवळचे विक्रेते ते लगेच पाहतील — दलाल नाही, वाट पाहणे नाही.",

@@ -9,6 +9,7 @@ import Navbar from "@/components/navbar";
 import ImpactStats from "@/components/ImpactStats";
 import VendorMarketplaceFeed from "@/components/VendorMarketplaceFeed";
 import CropListingModal from "@/components/CropListingModal";
+import HeroBanner from "@/components/HeroBanner";
 
 import { useTranslation } from "@/lib/i18n";
 import type {
@@ -262,9 +263,15 @@ export default function DashboardPage() {
 
         {role === "vendor" ? (
           <>
-            <h1 className="mb-4 font-serif text-2xl font-semibold text-[#1B4332]">
-              {t("dashboard.freshNearYou")}
-            </h1>
+            <div className="mb-5">
+              <HeroBanner
+                imageSrc="/images/vendor-hero.jpg"
+                variant="vendor"
+                eyebrow="MARKETPLACE"
+                title={t("dashboard.freshNearYou")}
+                subtitle={t("dashboard.vendorHeroSubtitle")}
+              />
+            </div>
 
             <VendorMarketplaceFeed
               listings={listings}
@@ -278,23 +285,19 @@ export default function DashboardPage() {
 
           <div className="w-full">
 
-            {/* Farmer welcome card */}
-            <div className="rounded-3xl border border-dashed border-[#E4DCC8] bg-white p-6 text-center sm:p-10">
-
-              <h1 className="mb-2 font-serif text-2xl font-semibold text-[#1B4332]">
-                {t("dashboard.heroTitle")}
-              </h1>
-
-              <p className="mx-auto mb-6 max-w-sm text-sm text-[#8A8370]">
-                {t("dashboard.heroDescription")}
-              </p>
-
-              {/* Post Harvest */}
+            {/* Farmer welcome hero */}
+            <HeroBanner
+              imageSrc="/images/farmer-hero.jpg"
+              variant="farmer"
+              eyebrow="HARVEST SEASON"
+              title={t("dashboard.heroTitle")}
+              subtitle={t("dashboard.heroDescription")}
+            >
               <button
                 onClick={() =>
                   setModalOpen(true)
                 }
-                className="inline-flex items-center gap-2 rounded-2xl bg-[#1B4332] px-6 py-3.5 text-sm font-semibold text-[#FBF7EF] shadow-lg transition-transform active:scale-[0.98]"
+                className="inline-flex items-center gap-2 rounded-2xl bg-[#E8A33D] px-6 py-3.5 text-sm font-semibold text-[#1B4332] shadow-lg transition-transform active:scale-[0.98]"
               >
                 <Plus className="h-4 w-4" />
 
@@ -302,8 +305,7 @@ export default function DashboardPage() {
                   "dashboard.postNewHarvest"
                 )}
               </button>
-
-            </div>
+            </HeroBanner>
 
             {/* ============================================================ */}
             {/* FARMER OFFERS BUTTON                                         */}
