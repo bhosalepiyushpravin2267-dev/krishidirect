@@ -1,3 +1,4 @@
+
 // components/FarmerOffers.tsx
 "use client";
 
@@ -12,7 +13,10 @@ import {
     CircleCheck,
     User,
     IndianRupee,
+    ArrowLeft,
+    Ban,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import {
     getOffers,
@@ -29,37 +33,34 @@ const DEAL_STAGES: {
     {
         id: "offer-received",
         label: "Offer Received",
-        description:
-            "Vendor has submitted an offer.",
+        description: "Vendor has submitted an offer.",
     },
     {
         id: "offer-accepted",
         label: "Offer Accepted",
-        description:
-            "Farmer accepted the vendor's offer.",
+        description: "Farmer accepted the vendor's offer.",
     },
     {
         id: "pickup-arranged",
         label: "Pickup Arranged",
-        description:
-            "Pickup has been arranged.",
+        description: "Pickup has been arranged.",
     },
     {
         id: "completed",
         label: "Completed",
-        description:
-            "Transaction completed successfully.",
+        description: "Transaction completed successfully.",
     },
 ];
 
-function getStageIndex(
-    stage: DealStage
-) {
+function getStageIndex(stage: DealStage) {
     return DEAL_STAGES.findIndex(
-        (item) =>
-            item.id === stage
+        (item) => item.id === stage
     );
 }
+
+/* -------------------------------------------------------
+   STATUS BADGE
+------------------------------------------------------- */
 
 function StatusBadge({
     status,
@@ -68,7 +69,7 @@ function StatusBadge({
 }) {
     if (status === "pending") {
         return (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#FFF4D6] px-3 py-1 text-xs font-semibold text-[#9A6B00]">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FFF4D6] px-3 py-1.5 text-xs font-semibold text-[#9A6B00]">
                 <Clock className="h-3.5 w-3.5" />
                 Pending
             </span>
@@ -77,7 +78,7 @@ function StatusBadge({
 
     if (status === "accepted") {
         return (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#EAF1EC] px-3 py-1 text-xs font-semibold text-[#1B4332]">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#EAF1EC] px-3 py-1.5 text-xs font-semibold text-[#1B6B43]">
                 <Check className="h-3.5 w-3.5" />
                 Accepted
             </span>
@@ -85,22 +86,25 @@ function StatusBadge({
     }
 
     return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-[#FCEFE3] px-3 py-1 text-xs font-semibold text-[#B44822]">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FCEFE3] px-3 py-1.5 text-xs font-semibold text-[#B44822]">
             <X className="h-3.5 w-3.5" />
             Rejected
         </span>
     );
 }
 
+/* -------------------------------------------------------
+   DEAL PROGRESS
+------------------------------------------------------- */
+
 function DealProgress({
     offer,
 }: {
     offer: MarketplaceOffer;
 }) {
-    const currentIndex =
-        getStageIndex(
-            offer.dealStage
-        );
+    const currentIndex = getStageIndex(
+        offer.dealStage
+    );
 
     return (
         <div className="mt-6 rounded-2xl bg-[#FBF7EF] p-5">
@@ -116,23 +120,16 @@ function DealProgress({
 
             <div className="space-y-4">
                 {DEAL_STAGES.map(
-                    (
-                        stage,
-                        index
-                    ) => {
+                    (stage, index) => {
                         const completed =
-                            index <=
-                            currentIndex;
+                            index <= currentIndex;
 
                         const isCurrent =
-                            index ===
-                            currentIndex;
+                            index === currentIndex;
 
                         return (
                             <div
-                                key={
-                                    stage.id
-                                }
+                                key={stage.id}
                                 className="flex items-start gap-3"
                             >
                                 <div className="flex flex-col items-center">
@@ -143,30 +140,25 @@ function DealProgress({
                                                 : "bg-[#E4DCC8] text-[#8A8370]"
                                         }`}
                                     >
-                                        {index ===
-                                            0 && (
+                                        {index === 0 && (
                                             <Clock className="h-4 w-4" />
                                         )}
 
-                                        {index ===
-                                            1 && (
+                                        {index === 1 && (
                                             <Check className="h-4 w-4" />
                                         )}
 
-                                        {index ===
-                                            2 && (
+                                        {index === 2 && (
                                             <Truck className="h-4 w-4" />
                                         )}
 
-                                        {index ===
-                                            3 && (
+                                        {index === 3 && (
                                             <CircleCheck className="h-4 w-4" />
                                         )}
                                     </div>
 
                                     {index <
-                                        DEAL_STAGES.length -
-                                            1 && (
+                                        DEAL_STAGES.length - 1 && (
                                         <div
                                             className={`mt-1 h-7 w-0.5 ${
                                                 index <
@@ -186,9 +178,7 @@ function DealProgress({
                                                 : "text-[#8A8370]"
                                         }`}
                                     >
-                                        {
-                                            stage.label
-                                        }
+                                        {stage.label}
 
                                         {isCurrent && (
                                             <span className="ml-2 rounded-full bg-[#E8A33D] px-2 py-0.5 text-[10px] font-semibold text-[#1B4332]">
@@ -198,9 +188,7 @@ function DealProgress({
                                     </p>
 
                                     <p className="mt-0.5 text-xs text-[#8A8370]">
-                                        {
-                                            stage.description
-                                        }
+                                        {stage.description}
                                     </p>
                                 </div>
                             </div>
@@ -209,16 +197,14 @@ function DealProgress({
                 )}
             </div>
 
-            {/* Advance deal */}
-            {offer.status ===
-                "accepted" &&
-                offer.dealStage !==
-                    "completed" && (
+            {/* ADVANCE DEAL */}
+
+            {offer.status === "accepted" &&
+                offer.dealStage !== "completed" && (
                     <button
                         onClick={() => {
                             const nextStage =
-                                currentIndex +
-                                1;
+                                currentIndex + 1;
 
                             if (
                                 nextStage <
@@ -235,7 +221,7 @@ function DealProgress({
                                 );
                             }
                         }}
-                        className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1B4332] py-3 text-sm font-semibold text-white"
+                        className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1B4332] py-3 text-sm font-semibold text-white transition hover:bg-[#143528]"
                     >
                         {offer.dealStage ===
                             "offer-accepted" && (
@@ -254,27 +240,39 @@ function DealProgress({
                         )}
                     </button>
                 )}
+
+            {offer.dealStage === "completed" && (
+                <div className="mt-5 rounded-xl bg-[#EAF1EC] p-4 text-center">
+                    <div className="flex items-center justify-center gap-2 text-sm font-semibold text-[#1B4332]">
+                        <CircleCheck className="h-5 w-5" />
+                        Deal Completed Successfully
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
 
+/* -------------------------------------------------------
+   MAIN COMPONENT
+------------------------------------------------------- */
+
 export default function FarmerOffers() {
+    const router = useRouter();
+
     const [offers, setOffers] =
-        useState<
-            MarketplaceOffer[]
-        >([]);
+        useState<MarketplaceOffer[]>([]);
 
     const loadOffers = () => {
-        setOffers(
-            getOffers()
-        );
+        setOffers(getOffers());
     };
 
     useEffect(() => {
         loadOffers();
 
-        const handler = () =>
+        const handler = () => {
             loadOffers();
+        };
 
         window.addEventListener(
             "krishidirect-offers-updated",
@@ -289,30 +287,55 @@ export default function FarmerOffers() {
         };
     }, []);
 
+    /* -------------------------------------------------------
+       ACCEPT OFFER
+    ------------------------------------------------------- */
+
     const handleAccept = (
         offer: MarketplaceOffer
     ) => {
-        updateOffer(
-            offer.id,
-            {
-                status: "accepted",
-                dealStage:
-                    "offer-accepted",
-            }
-        );
+        updateOffer(offer.id, {
+            status: "accepted",
+            dealStage: "offer-accepted",
+        });
 
         loadOffers();
     };
 
+    /* -------------------------------------------------------
+       REJECT OFFER
+    ------------------------------------------------------- */
+
     const handleReject = (
         offer: MarketplaceOffer
     ) => {
-        updateOffer(
-            offer.id,
-            {
-                status: "rejected",
-            }
-        );
+        updateOffer(offer.id, {
+            status: "rejected",
+        });
+
+        loadOffers();
+    };
+
+    /* -------------------------------------------------------
+       CANCEL OFFER
+       
+       Since the offer is stored in localStorage, cancellation
+       is implemented by changing it to rejected.
+    ------------------------------------------------------- */
+
+    const handleCancel = (
+        offer: MarketplaceOffer
+    ) => {
+        const confirmed =
+            window.confirm(
+                "Are you sure you want to cancel this offer?"
+            );
+
+        if (!confirmed) return;
+
+        updateOffer(offer.id, {
+            status: "rejected",
+        });
 
         loadOffers();
     };
@@ -321,7 +344,37 @@ export default function FarmerOffers() {
         <main className="min-h-screen bg-[#FBF7EF] px-4 py-6 sm:px-6">
             <div className="mx-auto max-w-5xl">
 
-                {/* HEADER */}
+                {/* ------------------------------------------------
+                    TOP NAVIGATION
+                ------------------------------------------------ */}
+
+                <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                    <button
+                        type="button"
+                        onClick={() => {
+                            router.push("/");
+                        }}
+                        className="inline-flex items-center gap-2 rounded-xl border border-[#E4DCC8] bg-white px-4 py-2.5 text-sm font-semibold text-[#1B4332] shadow-sm transition hover:border-[#1B4332] hover:bg-[#EAF1EC]"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        Back to Main Page
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => {
+                            window.location.href = "/";
+                        }}
+                        className="rounded-xl bg-[#1B4332] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#143528]"
+                    >
+                        Main Dashboard
+                    </button>
+                </div>
+
+                {/* ------------------------------------------------
+                    HEADER
+                ------------------------------------------------ */}
+
                 <section className="mb-6 rounded-3xl bg-[#1B4332] p-6 text-[#FBF7EF] shadow-lg sm:p-8">
                     <div className="flex items-center gap-4">
                         <div className="grid h-12 w-12 place-items-center rounded-2xl bg-[#E8A33D] text-[#1B4332]">
@@ -344,9 +397,11 @@ export default function FarmerOffers() {
                     </div>
                 </section>
 
-                {/* NO OFFERS */}
-                {offers.length ===
-                    0 && (
+                {/* ------------------------------------------------
+                    NO OFFERS
+                ------------------------------------------------ */}
+
+                {offers.length === 0 && (
                     <div className="rounded-3xl border border-dashed border-[#E4DCC8] bg-white p-12 text-center">
                         <Package className="mx-auto h-12 w-12 text-[#B9C9BB]" />
 
@@ -355,180 +410,232 @@ export default function FarmerOffers() {
                         </h2>
 
                         <p className="mt-2 text-sm text-[#8A8370]">
-                            When vendors make offers on your crops, they will appear here.
+                            When vendors make offers on your crops,
+                            they will appear here.
                         </p>
+
+                        <button
+                            type="button"
+                            onClick={() => {
+                                router.push("/");
+                            }}
+                            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#1B4332] px-5 py-3 text-sm font-semibold text-white"
+                        >
+                            <ArrowLeft className="h-4 w-4" />
+                            Go to Marketplace
+                        </button>
                     </div>
                 )}
 
-                {/* OFFERS */}
+                {/* ------------------------------------------------
+                    OFFERS
+                ------------------------------------------------ */}
+
                 <div className="space-y-5">
-                    {offers.map(
-                        (offer) => (
-                            <section
-                                key={
-                                    offer.id
-                                }
-                                className="rounded-3xl border border-[#E4DCC8] bg-white p-5 shadow-sm sm:p-6"
-                            >
-                                {/* OFFER HEADER */}
-                                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="grid h-12 w-12 place-items-center rounded-xl bg-[#EAF1EC] text-[#1B4332]">
-                                            <User className="h-6 w-6" />
-                                        </div>
+                    {offers.map((offer) => (
+                        <section
+                            key={offer.id}
+                            className="rounded-3xl border border-[#E4DCC8] bg-white p-5 shadow-sm sm:p-6"
+                        >
+                            {/* OFFER HEADER */}
 
-                                        <div>
-                                            <p className="font-semibold text-[#1B4332]">
-                                                {
-                                                    offer.vendorName
-                                                }
-                                            </p>
-
-                                            <p className="text-xs text-[#8A8370]">
-                                                Vendor offer
-                                            </p>
-                                        </div>
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="grid h-12 w-12 place-items-center rounded-xl bg-[#EAF1EC] text-[#1B4332]">
+                                        <User className="h-6 w-6" />
                                     </div>
 
-                                    <StatusBadge
-                                        status={
-                                            offer.status
+                                    <div>
+                                        <p className="font-semibold text-[#1B4332]">
+                                            {offer.vendorName}
+                                        </p>
+
+                                        <p className="text-xs text-[#8A8370]">
+                                            Vendor offer
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <StatusBadge
+                                    status={
+                                        offer.status
+                                    }
+                                />
+                            </div>
+
+                            {/* OFFER DETAILS */}
+
+                            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                                <div className="rounded-2xl bg-[#FBF7EF] p-4">
+                                    <p className="text-xs text-[#8A8370]">
+                                        Crop
+                                    </p>
+
+                                    <p className="mt-1 font-semibold capitalize text-[#1B4332]">
+                                        {offer.crop}
+                                    </p>
+                                </div>
+
+                                <div className="rounded-2xl bg-[#FBF7EF] p-4">
+                                    <p className="text-xs text-[#8A8370]">
+                                        Quantity
+                                    </p>
+
+                                    <p className="mt-1 font-semibold text-[#1B4332]">
+                                        {offer.quantity}{" "}
+                                        {offer.unit}
+                                    </p>
+                                </div>
+
+                                <div className="rounded-2xl bg-[#FCEFE3] p-4">
+                                    <p className="text-xs text-[#8A8370]">
+                                        Offered Price
+                                    </p>
+
+                                    <p className="mt-1 flex items-center font-semibold text-[#C4622D]">
+                                        <IndianRupee className="h-4 w-4" />
+
+                                        {offer.offeredPricePerUnit}
+                                        /kg
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* PRICE COMPARISON */}
+
+                            <div className="mt-4 flex flex-col gap-2 rounded-2xl border border-[#E4DCC8] p-4 sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                    <p className="text-xs text-[#8A8370]">
+                                        Your listed price
+                                    </p>
+
+                                    <p className="font-semibold text-[#3D4A42]">
+                                        ₹
+                                        {
+                                            offer.originalPricePerUnit
                                         }
-                                    />
+                                        /kg
+                                    </p>
                                 </div>
 
-                                {/* OFFER DETAILS */}
-                                <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                                    <div className="rounded-2xl bg-[#FBF7EF] p-4">
-                                        <p className="text-xs text-[#8A8370]">
-                                            Crop
-                                        </p>
+                                <div>
+                                    <p className="text-xs text-[#8A8370]">
+                                        Total offer value
+                                    </p>
 
-                                        <p className="mt-1 font-semibold capitalize text-[#1B4332]">
-                                            {
-                                                offer.crop
-                                            }
-                                        </p>
-                                    </div>
-
-                                    <div className="rounded-2xl bg-[#FBF7EF] p-4">
-                                        <p className="text-xs text-[#8A8370]">
-                                            Quantity
-                                        </p>
-
-                                        <p className="mt-1 font-semibold text-[#1B4332]">
-                                            {
-                                                offer.quantity
-                                            }{" "}
-                                            {
-                                                offer.unit
-                                            }
-                                        </p>
-                                    </div>
-
-                                    <div className="rounded-2xl bg-[#FCEFE3] p-4">
-                                        <p className="text-xs text-[#8A8370]">
-                                            Offered Price
-                                        </p>
-
-                                        <p className="mt-1 flex items-center font-semibold text-[#C4622D]">
-                                            <IndianRupee className="h-4 w-4" />
-
-                                            {
-                                                offer.offeredPricePerUnit
-                                            }
-                                            /kg
-                                        </p>
-                                    </div>
+                                    <p className="font-serif text-xl font-semibold text-[#1B4332]">
+                                        ₹
+                                        {(
+                                            offer.quantity *
+                                            offer.offeredPricePerUnit
+                                        ).toLocaleString(
+                                            "en-IN"
+                                        )}
+                                    </p>
                                 </div>
+                            </div>
 
-                                {/* PRICE COMPARISON */}
-                                <div className="mt-4 flex flex-col gap-2 rounded-2xl border border-[#E4DCC8] p-4 sm:flex-row sm:items-center sm:justify-between">
-                                    <div>
-                                        <p className="text-xs text-[#8A8370]">
-                                            Your listed price
-                                        </p>
+                            {/* ------------------------------------------------
+                                PENDING ACTIONS
+                            ------------------------------------------------ */}
 
-                                        <p className="font-semibold text-[#3D4A42]">
-                                            ₹
-                                            {
-                                                offer.originalPricePerUnit
-                                            }
-                                            /kg
-                                        </p>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-xs text-[#8A8370]">
-                                            Total offer value
-                                        </p>
-
-                                        <p className="font-serif text-xl font-semibold text-[#1B4332]">
-                                            ₹
-                                            {(
-                                                offer.quantity *
-                                                offer.offeredPricePerUnit
-                                            ).toLocaleString(
-                                                "en-IN"
-                                            )}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* ACTION BUTTONS */}
-                                {offer.status ===
-                                    "pending" && (
-                                    <div className="mt-5 flex gap-3">
+                            {offer.status ===
+                                "pending" && (
+                                <div className="mt-5">
+                                    <div className="flex gap-3">
                                         <button
+                                            type="button"
                                             onClick={() =>
                                                 handleAccept(
                                                     offer
                                                 )
                                             }
-                                            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#1B4332] py-3 text-sm font-semibold text-white"
+                                            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#1B4332] py-3 text-sm font-semibold text-white transition hover:bg-[#143528]"
                                         >
                                             <Check className="h-4 w-4" />
-
                                             Accept
                                         </button>
 
                                         <button
+                                            type="button"
                                             onClick={() =>
                                                 handleReject(
                                                     offer
                                                 )
                                             }
-                                            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#FCEFE3] py-3 text-sm font-semibold text-[#C4622D]"
+                                            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#FCEFE3] py-3 text-sm font-semibold text-[#C4622D] transition hover:bg-[#F8E1D2]"
                                         >
                                             <X className="h-4 w-4" />
-
                                             Reject
                                         </button>
                                     </div>
-                                )}
 
-                                {/* DEAL PROGRESS */}
-                                {offer.status ===
-                                    "accepted" && (
-                                    <DealProgress
-                                        offer={
-                                            offer
+                                    {/* CANCEL */}
+
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            handleCancel(
+                                                offer
+                                            )
                                         }
-                                    />
-                                )}
+                                        className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-[#E4DCC8] py-2.5 text-xs font-semibold text-[#8A8370] transition hover:border-[#C4622D] hover:bg-[#FCEFE3] hover:text-[#B44822]"
+                                    >
+                                        <Ban className="h-3.5 w-3.5" />
+                                        Cancel Offer
+                                    </button>
+                                </div>
+                            )}
 
-                                {offer.status ===
-                                    "rejected" && (
-                                    <div className="mt-5 rounded-2xl bg-[#FCEFE3] p-4 text-center">
+                            {/* ------------------------------------------------
+                                DEAL PROGRESS
+                            ------------------------------------------------ */}
+
+                            {offer.status ===
+                                "accepted" && (
+                                <DealProgress
+                                    offer={offer}
+                                />
+                            )}
+
+                            {/* ------------------------------------------------
+                                REJECTED
+                            ------------------------------------------------ */}
+
+                            {offer.status ===
+                                "rejected" && (
+                                <div className="mt-5 rounded-2xl bg-[#FCEFE3] p-4 text-center">
+                                    <div className="flex items-center justify-center gap-2">
+                                        <X className="h-5 w-5 text-[#B44822]" />
+
                                         <p className="text-sm font-semibold text-[#B44822]">
-                                            This offer has been rejected.
+                                            This offer has been rejected or cancelled.
                                         </p>
                                     </div>
-                                )}
-                            </section>
-                        )
-                    )}
+                                </div>
+                            )}
+                        </section>
+                    ))}
                 </div>
+
+                {/* ------------------------------------------------
+                    BOTTOM BACK BUTTON
+                ------------------------------------------------ */}
+
+                {offers.length > 0 && (
+                    <div className="mt-8 flex justify-center pb-8">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                router.push("/");
+                            }}
+                            className="inline-flex items-center gap-2 rounded-2xl bg-[#1B4332] px-6 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:bg-[#143528]"
+                        >
+                            <ArrowLeft className="h-4 w-4" />
+                            Back to Main Page
+                        </button>
+                    </div>
+                )}
             </div>
         </main>
     );
