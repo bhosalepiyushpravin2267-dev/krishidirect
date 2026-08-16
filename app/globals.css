@@ -20,9 +20,19 @@
 }
 
 body {
-  background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* App background: soft warm-to-green gradient + subtle grain, replaces flat
+   cream. Grain via inline SVG noise filter — no image asset needed. */
+.app-bg {
+  background-color: #FBF7EF;
+  background-image:
+    radial-gradient(circle at 15% 0%, rgba(232, 163, 61, 0.10), transparent 45%),
+    radial-gradient(circle at 100% 30%, rgba(45, 106, 79, 0.08), transparent 50%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  background-attachment: fixed, fixed, fixed;
 }
 
 /* Hides the scrollbar on the navbar's inner scroll strip (Chrome/Safari/Edge —

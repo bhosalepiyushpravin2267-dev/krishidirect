@@ -240,7 +240,7 @@ export default function DashboardPage() {
   // -------------------------------------------------------------------------
 
   return (
-    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#FBF7EF]">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden">
 
       {/* NAVBAR */}
       <Navbar
