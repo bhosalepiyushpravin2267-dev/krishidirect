@@ -1,4 +1,9 @@
-import { offers } from "@/lib/db/mock-db";
+import {
+  getOfferById,
+  saveOffer,
+  updateOffer as updateOfferRepository,
+  deleteOffer as deleteOfferRepository,
+} from "@/lib/repositories/offer-repository";
 import type { Offer } from "@/types/backend";
 
 export interface CreateOfferInput {
@@ -25,7 +30,19 @@ export function createOffer(input: CreateOfferInput): Offer {
     createdAt: now,
   };
 
-  offers.push(newOffer);
+  return saveOffer(newOffer);
+}
 
-  return newOffer;
+export function getOffer(id: string): Offer | undefined {
+  return getOfferById(id);
+}
+export function updateOffer(
+  id: string,
+  updates: Partial<Offer>
+): Offer | undefined {
+  return updateOfferRepository(id, updates);
+}
+
+export function deleteOffer(id: string): boolean {
+  return deleteOfferRepository(id);
 }

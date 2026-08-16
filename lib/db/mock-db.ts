@@ -1,16 +1,4 @@
-import type { Farmer, Offer, Order } from "@/types/backend";
-
-export const farmers: Farmer[] = [
-  {
-    id: "farmer-001",
-    name: "Demo Farmer",
-    phone: "9999999999",
-    village: "Demo Village",
-    district: "Pune",
-    state: "Maharashtra",
-    role: "FARMER",
-  },
-];
+﻿import type { Offer, Order } from "@/types/backend";
 
 export const offers: Offer[] = [
   {
@@ -20,22 +8,22 @@ export const offers: Offer[] = [
     quantity: 500,
     unit: "kg",
     pricePerUnit: 28,
-    harvestDate: new Date().toISOString(),
+    harvestDate: "2026-08-16T10:30:15.914Z",
     freshnessScore: 92,
     status: "ACTIVE",
-    createdAt: new Date().toISOString(),
+    createdAt: "2026-08-16T10:30:15.914Z",
   },
   {
     id: "offer-002",
     farmerId: "farmer-001",
     cropName: "Onion",
-    quantity: 300,
+    quantity: 400,
     unit: "kg",
-    pricePerUnit: 25,
-    harvestDate: new Date().toISOString(),
+    pricePerUnit: 27,
+    harvestDate: "2026-08-16T10:30:15.914Z",
     freshnessScore: 88,
     status: "ACTIVE",
-    createdAt: new Date().toISOString(),
+    createdAt: "2026-08-16T10:30:15.914Z",
   },
 ];
 

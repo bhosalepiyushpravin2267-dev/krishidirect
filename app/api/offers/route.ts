@@ -1,52 +1,30 @@
 import { NextResponse } from "next/server";
 import { createOffer } from "@/lib/services/offer-service";
+import { validateCreateOffer } from "@/lib/validation/offer-validation";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    const {
-      farmerId,
-      cropName,
-      quantity,
-      unit,
-      pricePerUnit,
-    } = body;
+    const validation = validateCreateOffer(body);
 
-    if (
-      !farmerId ||
-      !cropName ||
-      !quantity ||
-      !unit ||
-      !pricePerUnit
-    ) {
+    if (!validation.valid) {
       return NextResponse.json(
         {
           success: false,
           data: null,
-          error: "Missing required fields",
-        },
-        { status: 400 }
-      );
-    }
-
-    if (quantity <= 0 || pricePerUnit <= 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          data: null,
-          error: "Quantity and price must be greater than zero",
+          error: validation.error,
         },
         { status: 400 }
       );
     }
 
     const offer = createOffer({
-      farmerId,
-      cropName,
-      quantity,
-      unit,
-      pricePerUnit,
+      farmerId: body.farmerId,
+      cropName: body.cropName,
+      quantity: body.quantity,
+      unit: body.unit,
+      pricePerUnit: body.pricePerUnit,
     });
 
     return NextResponse.json(
@@ -62,7 +40,7 @@ export async function POST(request: Request) {
       {
         success: false,
         data: null,
-        error: "Invalid request body",
+        error: "Invalid JSON request body",
       },
       { status: 400 }
     );
