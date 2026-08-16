@@ -31,7 +31,7 @@ body {
 .app-bg {
   background-color: #F3E2D0;
   background-image:
-    linear-gradient(rgba(243, 226, 208, 0.93), rgba(243, 226, 208, 0.93)),
+    linear-gradient(rgba(243, 226, 208, 0.50), rgba(243, 226, 208, 0.53)),
     url("/images/app-bg.jpg");
   background-blend-mode: normal;
   background-size: cover;
