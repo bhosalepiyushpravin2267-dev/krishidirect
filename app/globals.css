@@ -24,15 +24,15 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* App background: soft warm-to-green gradient + subtle grain, replaces flat
-   cream. Grain via inline SVG noise filter — no image asset needed. */
+/* App background: organic leaf/vine pattern, tiled, low opacity so it reads
+   as texture not decoration. Inline SVG data URI, no image asset needed. */
 .app-bg {
   background-color: #FBF7EF;
   background-image:
-    radial-gradient(circle at 15% 0%, rgba(232, 163, 61, 0.10), transparent 45%),
-    radial-gradient(circle at 100% 30%, rgba(45, 106, 79, 0.08), transparent 50%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
-  background-attachment: fixed, fixed, fixed;
+    radial-gradient(circle at 15% 0%, rgba(232, 163, 61, 0.08), transparent 45%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' viewBox='0 0 260 260'%3E%3Cg fill='none' stroke='%231B4332' stroke-width='1.4' opacity='0.055'%3E%3Cpath d='M20 40 Q40 10 70 25 Q60 45 20 40Z'/%3E%3Cpath d='M45 32 Q45 20 45 10' stroke-width='1'/%3E%3Cpath d='M150 70 Q180 45 210 65 Q195 90 150 70Z'/%3E%3Cpath d='M180 62 Q180 48 178 35' stroke-width='1'/%3E%3Cpath d='M30 150 Q60 130 85 155 Q65 175 30 150Z'/%3E%3Cpath d='M60 148 Q58 132 55 120' stroke-width='1'/%3E%3Cpath d='M170 190 Q195 165 225 182 Q212 205 170 190Z'/%3E%3Cpath d='M198 182 Q198 168 195 155' stroke-width='1'/%3E%3Cpath d='M100 220 Q10 200 -30 240' stroke-width='1'/%3E%3Cpath d='M120 0 Q140 40 110 70' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E");
+  background-attachment: fixed, fixed;
+  background-size: auto, 260px 260px;
 }
 
 /* Hides the scrollbar on the navbar's inner scroll strip (Chrome/Safari/Edge —
