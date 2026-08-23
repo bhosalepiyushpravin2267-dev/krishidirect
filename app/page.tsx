@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus, HandCoins } from "lucide-react";
+import { Plus, HandCoins, Warehouse } from "lucide-react";
 
 import Navbar from "@/components/navbar";
 import ImpactStats from "@/components/ImpactStats";
@@ -276,6 +276,36 @@ export default function DashboardPage() {
             <VendorMarketplaceFeed
               listings={listings}
             />
+
+            {/* ============================================================ */}
+            {/* STORAGE & COLD CHAIN — VENDOR ENTRY POINT                    */}
+            {/* ============================================================ */}
+
+            <div className="mt-6 rounded-3xl border border-[#E4DCC8] bg-white p-5 shadow-sm sm:p-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#EAF1EC]">
+                    <Warehouse className="h-5 w-5 text-[#1B4332]" />
+                  </div>
+                  <div>
+                    <h2 className="font-serif text-xl font-semibold text-[#1B4332]">
+                      Storage &amp; Cold Chain
+                    </h2>
+                    <p className="text-xs text-[#8A8370]">
+                      Reserve cold storage near your buyers before bulk pickup
+                    </p>
+                  </div>
+                </div>
+
+                <Link
+                  href="/storage"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#1B4332] px-5 py-3 text-sm font-semibold text-[#FBF7EF] shadow-md transition-all hover:bg-[#2D6A4F] active:scale-[0.98]"
+                >
+                  <Warehouse className="h-4 w-4" />
+                  Find Storage Facilities
+                </Link>
+              </div>
+            </div>
           </>
         ) : (
 
@@ -356,6 +386,36 @@ export default function DashboardPage() {
 
               </div>
 
+            </div>
+
+            {/* ============================================================ */}
+            {/* STORAGE & COLD CHAIN — FARMER ENTRY POINT                    */}
+            {/* ============================================================ */}
+
+            <div className="mt-6 rounded-3xl border border-[#E4DCC8] bg-white p-5 shadow-sm sm:p-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#EAF1EC]">
+                    <Warehouse className="h-5 w-5 text-[#1B4332]" />
+                  </div>
+                  <div>
+                    <h2 className="font-serif text-xl font-semibold text-[#1B4332]">
+                      Storage &amp; Cold Chain
+                    </h2>
+                    <p className="text-xs text-[#8A8370]">
+                      Find nearby cold storage before your harvest spoils
+                    </p>
+                  </div>
+                </div>
+
+                <Link
+                  href="/storage"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#1B4332] px-5 py-3 text-sm font-semibold text-[#FBF7EF] shadow-md transition-all hover:bg-[#2D6A4F] active:scale-[0.98]"
+                >
+                  <Warehouse className="h-4 w-4" />
+                  Find Storage Facilities
+                </Link>
+              </div>
             </div>
 
           </div>
