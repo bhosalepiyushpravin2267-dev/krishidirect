@@ -1,3 +1,4 @@
+// app/api/offers/[id]/route.ts
 import { NextResponse } from "next/server";
 import {
   getOffer,
