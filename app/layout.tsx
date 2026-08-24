@@ -37,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         any descendant (fixed-position widgets, negative-margin decorative shapes,
         off-canvas modals) regardless of which component introduces it.
       */}
-      <body className="w-full max-w-full overflow-x-hidden bg-[#FBF7EF] font-sans antialiased">
+      <body className="app-bg w-full max-w-full overflow-x-hidden font-sans antialiased">
         <Providers>{children}</Providers>
       </body>
     </html>

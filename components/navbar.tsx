@@ -3,10 +3,11 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sprout, Globe, ChevronDown, Check } from "lucide-react";
+import { Sprout, Globe, ChevronDown, Check, Brain } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
 import type { Language, UserRole } from "@/types/marketplace";
+import { useRouter, usePathname } from "next/navigation";
 
 interface NavbarProps {
     role: UserRole;
@@ -22,22 +23,30 @@ const LANGUAGES: Record<Language, string> = {
 export default function Navbar({ role, onRoleChange }: NavbarProps) {
     const [langOpen, setLangOpen] = useState(false);
     const { language, setLanguage, t } = useTranslation();
+    const router = useRouter();
+    const pathname = usePathname();
+    const isDecisionEngine = pathname === "/decision-engine";
 
     return (
         <header className="sticky top-0 z-40 w-full max-w-full border-b border-[#E4DCC8] bg-[#FBF7EF]/90 backdrop-blur-md">
             <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-1.5 px-3 py-3 sm:gap-3 sm:px-6">
-                {/* Wordmark */}
-                <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+                {/* Wordmark — icon-only below sm so the four nav items (logo, role
+            toggle, decision engine, language) all fit on a phone screen
+            without pushing anything off the right edge. */}
+                <button
+                    onClick={() => router.push("/")}
+                    className="flex shrink-0 items-center gap-1.5 sm:gap-2"
+                >
                     <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#1B4332] sm:h-9 sm:w-9">
                         <Sprout className="h-4 w-4 text-[#E8A33D] sm:h-5 sm:w-5" strokeWidth={2.25} />
                     </div>
-                    <span className="whitespace-nowrap font-serif text-base font-semibold tracking-tight text-[#1B4332] sm:text-lg">
+                    <span className="hidden whitespace-nowrap font-serif text-base font-semibold tracking-tight text-[#1B4332] min-[420px]:inline sm:text-lg">
                         Krishi<span className="text-[#C4622D]">Direct</span>
                     </span>
-                </div>
+                </button>
 
-                <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
-                    {/* Role toggle */}
+                <div className="flex min-w-0 items-center gap-1 sm:gap-2">
+                    {/* Farmer / Vendor */}
                     <div
                         role="tablist"
                         aria-label="Switch mode"
@@ -47,14 +56,19 @@ export default function Navbar({ role, onRoleChange }: NavbarProps) {
                             <button
                                 key={r}
                                 role="tab"
-                                aria-selected={role === r}
-                                onClick={() => onRoleChange(r)}
+                                aria-selected={role === r && !isDecisionEngine}
+                                onClick={() => {
+                                    onRoleChange(r);
+                                    router.push("/");
+                                }}
                                 className={cn(
-                                    "relative z-10 rounded-full px-2.5 py-1.5 capitalize transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332] sm:px-3.5",
-                                    role === r ? "text-[#FBF7EF]" : "text-[#3D4A42] hover:text-[#1B4332]"
+                                    "relative z-10 rounded-full px-2 py-1.5 capitalize transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332] sm:px-3.5",
+                                    role === r && !isDecisionEngine
+                                        ? "text-[#FBF7EF]"
+                                        : "text-[#3D4A42] hover:text-[#1B4332]"
                                 )}
                             >
-                                {role === r && (
+                                {role === r && !isDecisionEngine && (
                                     <motion.span
                                         layoutId="role-pill"
                                         className="absolute inset-0 -z-10 rounded-full bg-[#1B4332]"
@@ -66,6 +80,23 @@ export default function Navbar({ role, onRoleChange }: NavbarProps) {
                         ))}
                     </div>
 
+                    {/* Decision Engine — icon-only pill below sm, icon+label from sm up.
+              This, not the language button, was the item pushing the row
+              over the viewport width once it was added. */}
+                    <button
+                        onClick={() => router.push("/decision-engine")}
+                        aria-label="Decision Engine"
+                        className={cn(
+                            "flex shrink-0 items-center gap-1.5 rounded-full px-2 py-1.5 text-xs font-semibold transition-all sm:px-3.5 sm:text-sm",
+                            isDecisionEngine
+                                ? "bg-[#E8A33D] text-[#1B4332] shadow-sm"
+                                : "border border-[#E4DCC8] bg-white text-[#1B4332] hover:border-[#1B4332]"
+                        )}
+                    >
+                        <Brain className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+                        <span className="hidden sm:inline">Decision Engine</span>
+                    </button>
+
                     {/* Language switcher — shows just the 2-letter code below sm so it can
               never push the row wider than the viewport; full name from sm up. */}
                     <div className="relative shrink-0">
@@ -74,14 +105,14 @@ export default function Navbar({ role, onRoleChange }: NavbarProps) {
                             aria-haspopup="listbox"
                             aria-expanded={langOpen}
                             aria-label={`Language: ${LANGUAGES[language]}`}
-                            className="flex items-center gap-1 rounded-full border border-[#E4DCC8] bg-white px-2.5 py-1.5 text-xs font-medium text-[#3D4A42] transition-colors hover:border-[#1B4332] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332] sm:gap-1.5 sm:px-3 sm:text-sm"
+                            className="flex items-center gap-1 rounded-full border border-[#E4DCC8] bg-white px-2 py-1.5 text-xs font-medium text-[#3D4A42] transition-colors hover:border-[#1B4332] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332] sm:gap-1.5 sm:px-3 sm:text-sm"
                         >
                             <Globe className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
                             <span className="sm:hidden">{language.toUpperCase()}</span>
                             <span className="hidden sm:inline">{LANGUAGES[language]}</span>
                             <ChevronDown
                                 className={cn(
-                                    "h-3 w-3 shrink-0 transition-transform sm:h-3.5 sm:w-3.5",
+                                    "hidden h-3.5 w-3.5 shrink-0 transition-transform sm:block",
                                     langOpen && "rotate-180"
                                 )}
                             />

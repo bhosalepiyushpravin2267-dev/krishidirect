@@ -20,7 +20,28 @@
 }
 
 body {
-  background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* App background: full-bleed photo, heavily tinted so cards/text stay
+   readable — same linear-gradient(tint), url(photo) layering trick as
+   HeroBanner.tsx. Photo goes in /public/images/app-bg.jpg (add it yourself,
+   see public/images/README.md). Falls back to flat clay tint if missing. */
+.app-bg {
+  background-color: #F3E2D0;
+  background-image:
+    linear-gradient(rgba(243, 226, 208, 0.50), rgba(243, 226, 208, 0.53)),
+    url("/images/app-bg.jpg");
+  background-blend-mode: normal;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* Hides the scrollbar on the navbar's inner scroll strip (Chrome/Safari/Edge —
+   Firefox and IE are handled inline via scrollbarWidth/msOverflowStyle) while
+   keeping it fully scrollable. Purely cosmetic; doesn't affect touch/wheel input. */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
