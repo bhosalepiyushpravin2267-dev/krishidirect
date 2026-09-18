@@ -1,4 +1,4 @@
-﻿import type { Offer, Order } from "@/types/backend";
+﻿import type { Offer, Order, Payment } from "@/types/backend";
 
 export const offers: Offer[] = [
   {
@@ -28,3 +28,5 @@ export const offers: Offer[] = [
 ];
 
 export const orders: Order[] = [];
+
+export const payments: Payment[] = [];
