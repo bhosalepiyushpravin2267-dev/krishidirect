@@ -7,11 +7,15 @@ import { Plus, HandCoins } from "lucide-react";
 
 import Navbar from "@/components/navbar";
 import ImpactStats from "@/components/ImpactStats";
-import VendorMarketplaceFeed from "@/components/VendorMarketplaceFeed";
+import CustomerMarketplaceFeed from "@/components/CustomerMarketplaceFeed";
 import CropListingModal from "@/components/CropListingModal";
+import RecipeAssistant from "@/components/RecipeAssistant";
+import CustomerCart from "@/components/CustomerCart";
 
+import { mergeCartItem } from "@/lib/cart";
 import { useTranslation } from "@/lib/i18n";
 import type {
+  CartItem,
   CropListing,
   ImpactMetrics,
   UserRole,
@@ -24,7 +28,7 @@ import type {
 const MOCK_METRICS: ImpactMetrics = {
   totalProduceSavedKg: 1420,
   farmerEarningsBoostPercent: 28,
-  activeVendorDeals: 34,
+  activeCustomerDeals: 34,
   weeklyTrendPercent: 12,
 };
 
@@ -179,6 +183,13 @@ export default function DashboardPage() {
     useState<CropListing[]>(MOCK_LISTINGS);
 
   const [modalOpen, setModalOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [cart, setCart] = useState<CartItem[]>([]);
+
+  const addToCart = (item: CartItem) => {
+    setCart((prev) => mergeCartItem(prev, item));
+    setCartOpen(true);
+  };
 
   // -------------------------------------------------------------------------
   // Create new farmer listing
@@ -245,6 +256,8 @@ export default function DashboardPage() {
       <Navbar
         role={role}
         onRoleChange={setRole}
+        cartCount={cart.length}
+        onCartOpen={() => setCartOpen(true)}
       />
 
       <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
@@ -257,17 +270,31 @@ export default function DashboardPage() {
         </div>
 
         {/* ================================================================ */}
-        {/* VENDOR VIEW                                                      */}
+        {/* CUSTOMER VIEW */}
         {/* ================================================================ */}
 
-        {role === "vendor" ? (
+        {role === "customer" ? (
           <>
             <h1 className="mb-4 font-serif text-2xl font-semibold text-[#1B4332]">
               {t("dashboard.freshNearYou")}
             </h1>
 
-            <VendorMarketplaceFeed
+            <RecipeAssistant
               listings={listings}
+              onAddAllToCart={(items) => {
+                setCart((prev) =>
+                  items.reduce(
+                    (next, item) => mergeCartItem(next, item),
+                    prev
+                  )
+                );
+                setCartOpen(true);
+              }}
+            />
+
+            <CustomerMarketplaceFeed
+              listings={listings}
+              onAddToCart={addToCart}
             />
           </>
         ) : (
@@ -330,7 +357,7 @@ export default function DashboardPage() {
                       </h2>
 
                       <p className="text-xs text-[#8A8370]">
-                        View and manage offers from vendors
+                        View and manage offers from customers
                       </p>
 
                     </div>
@@ -387,6 +414,16 @@ export default function DashboardPage() {
           setModalOpen(false)
         }
         onSubmit={handleNewListing}
+      />
+
+      <CustomerCart
+        open={cartOpen}
+        onClose={() => setCartOpen(false)}
+        cart={cart}
+        onClearCart={() => setCart([])}
+        onRemoveItem={(id) =>
+          setCart((prev) => prev.filter((item) => item.id !== id))
+        }
       />
 
     </div>

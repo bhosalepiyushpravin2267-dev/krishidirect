@@ -8,6 +8,7 @@ import {
     ChevronDown,
     Check,
     Brain,
+    ShoppingCart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
@@ -17,6 +18,8 @@ import { useRouter, usePathname } from "next/navigation";
 interface NavbarProps {
     role: UserRole;
     onRoleChange: (role: UserRole) => void;
+    cartCount?: number;
+    onCartOpen?: () => void;
 }
 
 const LANGUAGES: Record<Language, string> = {
@@ -25,7 +28,12 @@ const LANGUAGES: Record<Language, string> = {
     mr: "मराठी",
 };
 
-export default function Navbar({ role, onRoleChange }: NavbarProps) {
+export default function Navbar({
+    role,
+    onRoleChange,
+    cartCount = 0,
+    onCartOpen,
+}: NavbarProps) {
     const [langOpen, setLangOpen] = useState(false);
     const { language, setLanguage, t } = useTranslation();
 
@@ -57,13 +65,13 @@ export default function Navbar({ role, onRoleChange }: NavbarProps) {
 
                 <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
 
-                    {/* Farmer / Vendor */}
+                    {/* Farmer / Customer */}
                     <div
                         role="tablist"
                         aria-label="Switch mode"
                         className="relative flex shrink-0 rounded-full bg-[#EFE8D6] p-1 text-xs font-medium sm:text-sm"
                     >
-                        {(["farmer", "vendor"] as UserRole[]).map((r) => (
+                        {(["farmer", "customer"] as UserRole[]).map((r) => (
                             <button
                                 key={r}
                                 role="tab"
@@ -93,10 +101,26 @@ export default function Navbar({ role, onRoleChange }: NavbarProps) {
 
                                 {r === "farmer"
                                     ? t("nav.farmer")
-                                    : t("nav.vendor")}
+                                    : t("nav.customer")}
                             </button>
                         ))}
                     </div>
+
+                    {role === "customer" && onCartOpen && (
+                        <button
+                            type="button"
+                            onClick={onCartOpen}
+                            aria-label={`Shopping cart, ${cartCount} items`}
+                            className="relative flex shrink-0 items-center justify-center rounded-full border border-[#E4DCC8] bg-white p-2 text-[#1B4332] hover:border-[#1B4332]"
+                        >
+                            <ShoppingCart className="h-4 w-4" />
+                            {cartCount > 0 && (
+                                <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-[#C4622D] px-1 text-[10px] font-semibold text-white">
+                                    {cartCount}
+                                </span>
+                            )}
+                        </button>
+                    )}
 
                     {/* Decision Engine */}
                     <button

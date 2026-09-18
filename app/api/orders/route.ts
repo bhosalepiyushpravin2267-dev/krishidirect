@@ -43,8 +43,12 @@ export async function POST(request: Request) {
 
     const result = createOrder({
       offerId: body.offerId,
-      vendorId: body.vendorId,
+      customerId: validation.customerId,
       quantity: body.quantity,
+      deliveryAddress: body.deliveryAddress,
+      pincode: body.pincode,
+      preferredDeliverySlot: body.preferredDeliverySlot,
+      deliverySpeed: body.deliverySpeed,
     });
 
     if (!result.success) {

@@ -31,3 +31,12 @@ export function formatINR(value: number): string {
         maximumFractionDigits: 0,
     }).format(value);
 }
+
+export function formatINRExact(value: number): string {
+    return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+    }).format(value);
+}

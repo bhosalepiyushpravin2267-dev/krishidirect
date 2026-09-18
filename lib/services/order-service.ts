@@ -10,12 +10,16 @@ import {
   updateOrder,
 } from "@/lib/repositories/order-repository";
 
-import type { Order } from "@/types/backend";
+import type { DeliverySpeed, Order, OrderStatus } from "@/types/backend";
 
 export interface CreateOrderInput {
   offerId: string;
-  vendorId: string;
+  customerId: string;
   quantity: number;
+  deliveryAddress?: string;
+  pincode?: string;
+  preferredDeliverySlot?: string;
+  deliverySpeed?: DeliverySpeed;
 }
 
 export function createOrder(
@@ -59,11 +63,16 @@ export function createOrder(
   const order: Order = {
     id: `order-${Date.now()}`,
     offerId: offer.id,
-    vendorId: input.vendorId,
+    customerId: input.customerId,
     quantity: input.quantity,
     totalAmount: input.quantity * offer.pricePerUnit,
     status: "PENDING",
     createdAt: now,
+    deliveryAddress: input.deliveryAddress,
+    pincode: input.pincode,
+    preferredDeliverySlot: input.preferredDeliverySlot,
+    deliverySpeed: input.deliverySpeed,
+    deliveryStatus: "ORDER_PLACED",
   };
 
   const remainingQuantity = offer.quantity - input.quantity;
@@ -89,16 +98,17 @@ export function getOrder(id: string): Order | undefined {
   return getOrderById(id);
 }
 
-const validTransitions: Record<Order["status"], Order["status"][]> = {
+const validTransitions: Record<OrderStatus, OrderStatus[]> = {
   PENDING: ["PENDING", "CONFIRMED", "CANCELLED"],
-  CONFIRMED: ["CONFIRMED", "COMPLETED", "CANCELLED"],
+  CONFIRMED: ["CONFIRMED", "OUT_FOR_DELIVERY", "COMPLETED", "CANCELLED"],
+  OUT_FOR_DELIVERY: ["OUT_FOR_DELIVERY", "COMPLETED"],
   COMPLETED: ["COMPLETED"],
   CANCELLED: ["CANCELLED"],
 };
 
 export function changeOrderStatus(
   id: string,
-  status: Order["status"]
+  status: OrderStatus
 ):
   | { success: true; order: Order }
   | { success: false; error: string; code: "NOT_FOUND" | "INVALID_TRANSITION" } {
@@ -143,8 +153,18 @@ export function changeOrderStatus(
     });
   }
 
+  const deliveryStatus =
+    status === "CONFIRMED"
+      ? "PACKED"
+      : status === "OUT_FOR_DELIVERY"
+        ? "OUT_FOR_DELIVERY"
+        : status === "COMPLETED"
+          ? "DELIVERED"
+          : order.deliveryStatus ?? "ORDER_PLACED";
+
   const updated = updateOrder(id, {
     status,
+    deliveryStatus,
   });
 
   if (!updated) {

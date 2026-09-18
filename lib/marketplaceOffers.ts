@@ -17,8 +17,8 @@ export interface MarketplaceOffer {
 
     listingId: string;
 
-    vendorName: string;
-    vendorPhone: string;
+    customerName: string;
+    customerPhone: string;
 
     farmerId: string;
     farmerName: string;
@@ -58,9 +58,20 @@ export function getOffers(): MarketplaceOffer[] {
             return [];
         }
 
-        return JSON.parse(
-            stored
-        ) as MarketplaceOffer[];
+        const parsed = JSON.parse(stored) as Array<
+            MarketplaceOffer & {
+                vendorName?: string;
+                vendorPhone?: string;
+            }
+        >;
+
+        return parsed.map((offer) => ({
+            ...offer,
+            customerName:
+                offer.customerName ?? offer.vendorName ?? "Customer",
+            customerPhone:
+                offer.customerPhone ?? offer.vendorPhone ?? "",
+        }));
     } catch {
         return [];
     }

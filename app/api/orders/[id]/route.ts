@@ -56,6 +56,7 @@ export async function PUT(
     const allowedStatuses = [
       "PENDING",
       "CONFIRMED",
+      "OUT_FOR_DELIVERY",
       "COMPLETED",
       "CANCELLED",
     ];
@@ -69,7 +70,7 @@ export async function PUT(
           success: false,
           data: null,
           error:
-            "status must be PENDING, CONFIRMED, COMPLETED, or CANCELLED",
+            "status must be PENDING, CONFIRMED, OUT_FOR_DELIVERY, COMPLETED, or CANCELLED",
         },
         { status: 400 }
       );

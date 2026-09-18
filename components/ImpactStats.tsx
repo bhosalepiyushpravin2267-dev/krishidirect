@@ -32,7 +32,7 @@ interface ImpactStatsProps {
 export default function ImpactStats({ metrics }: ImpactStatsProps) {
     const { t } = useTranslation();
     const savedKg = useCountUp(metrics.totalProduceSavedKg);
-    const deals = useCountUp(metrics.activeVendorDeals);
+    const deals = useCountUp(metrics.activeCustomerDeals);
 
     const cards = [
         {

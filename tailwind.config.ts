@@ -20,7 +20,7 @@ const config: Config = {
             fontFamily: {
                 // Display face: warm, organic serif reserved for headlines & big numbers.
                 serif: ["Fraunces", "Georgia", "serif"],
-                // Body/UI face: high-legibility sans for anything a farmer or vendor reads at speed.
+                // Body/UI face: high-legibility sans for anything a farmer or customer reads at speed.
                 sans: ["Inter", "system-ui", "sans-serif"],
             },
         },

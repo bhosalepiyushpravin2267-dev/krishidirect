@@ -1,4 +1,4 @@
-export type UserRole = "FARMER" | "VENDOR" | "ADMIN";
+export type UserRole = "FARMER" | "CUSTOMER" | "ADMIN";
 
 export interface Farmer {
   id: string;
@@ -23,12 +23,30 @@ export interface Offer {
   createdAt: string;
 }
 
+export type OrderStatus =
+  | "PENDING"
+  | "CONFIRMED"
+  | "OUT_FOR_DELIVERY"
+  | "COMPLETED"
+  | "CANCELLED";
+
+export type DeliverySpeed = "STANDARD" | "EXPRESS";
+
 export interface Order {
   id: string;
   offerId: string;
-  vendorId: string;
+  customerId: string;
   quantity: number;
   totalAmount: number;
-  status: "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
+  status: OrderStatus;
   createdAt: string;
+  deliveryAddress?: string;
+  pincode?: string;
+  preferredDeliverySlot?: string;
+  deliverySpeed?: DeliverySpeed;
+  deliveryStatus?:
+    | "ORDER_PLACED"
+    | "PACKED"
+    | "OUT_FOR_DELIVERY"
+    | "DELIVERED";
 }

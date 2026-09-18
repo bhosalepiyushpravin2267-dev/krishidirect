@@ -33,12 +33,12 @@ const DEAL_STAGES: {
     {
         id: "offer-received",
         label: "Offer Received",
-        description: "Vendor has submitted an offer.",
+        description: "Customer has submitted an offer.",
     },
     {
         id: "offer-accepted",
         label: "Offer Accepted",
-        description: "Farmer accepted the vendor's offer.",
+        description: "Farmer accepted the customer's offer.",
     },
     {
         id: "pickup-arranged",
@@ -391,7 +391,7 @@ export default function FarmerOffers() {
                             </h1>
 
                             <p className="mt-1 text-sm text-[#D8E5DC]">
-                                Review vendor offers and manage your deals.
+                                Review customer offers and manage your deals.
                             </p>
                         </div>
                     </div>
@@ -410,7 +410,7 @@ export default function FarmerOffers() {
                         </h2>
 
                         <p className="mt-2 text-sm text-[#8A8370]">
-                            When vendors make offers on your crops,
+                            When customers make offers on your crops,
                             they will appear here.
                         </p>
 
@@ -447,11 +447,11 @@ export default function FarmerOffers() {
 
                                     <div>
                                         <p className="font-semibold text-[#1B4332]">
-                                            {offer.vendorName}
+                                            {offer.customerName}
                                         </p>
 
                                         <p className="text-xs text-[#8A8370]">
-                                            Vendor offer
+                                            Customer offer
                                         </p>
                                     </div>
                                 </div>

@@ -1,12 +1,15 @@
 ﻿export interface CreateOrderValidationInput {
   offerId: unknown;
-  vendorId: unknown;
+  customerId?: unknown;
+  vendorId?: unknown;
   quantity: unknown;
 }
 
 export function validateCreateOrder(
   input: CreateOrderValidationInput
-) {
+):
+  | { valid: true; error: null; customerId: string }
+  | { valid: false; error: string; customerId?: undefined } {
   if (
     typeof input.offerId !== "string" ||
     !input.offerId.trim()
@@ -17,13 +20,15 @@ export function validateCreateOrder(
     };
   }
 
-  if (
-    typeof input.vendorId !== "string" ||
-    !input.vendorId.trim()
-  ) {
+  const customerId =
+    (typeof input.customerId === "string" && input.customerId.trim()) ||
+    (typeof input.vendorId === "string" && input.vendorId.trim()) ||
+    "";
+
+  if (!customerId) {
     return {
       valid: false,
-      error: "vendorId is required",
+      error: "customerId is required",
     };
   }
 
@@ -41,5 +46,6 @@ export function validateCreateOrder(
   return {
     valid: true,
     error: null,
+    customerId,
   };
 }
