@@ -12,13 +12,26 @@ export type DealStage =
     | "pickup-arranged"
     | "completed";
 
+export type PaymentMethod =
+    | "UPI"
+    | "CARD"
+    | "BANK_TRANSFER"
+    | "PAY_ON_PICKUP";
+
+export type PaymentStatus =
+    | "PENDING"
+    | "PROCESSING"
+    | "PAID"
+    | "FAILED"
+    | "REFUNDED";
+
 export interface MarketplaceOffer {
     id: string;
 
     listingId: string;
 
-    vendorName: string;
-    vendorPhone: string;
+    customerName: string;
+    customerPhone: string;
 
     farmerId: string;
     farmerName: string;
@@ -34,6 +47,13 @@ export interface MarketplaceOffer {
     status: OfferStatus;
 
     dealStage: DealStage;
+
+    /** Optional backend order/payment references used when the API is connected. */
+    orderId?: string;
+    paymentId?: string;
+    paymentMethod?: PaymentMethod;
+    paymentStatus?: PaymentStatus;
+    transactionId?: string;
 
     createdAt: string;
 }

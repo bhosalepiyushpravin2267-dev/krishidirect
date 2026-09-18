@@ -46,13 +46,13 @@ export default function Navbar({ role, onRoleChange }: NavbarProps) {
                 </button>
 
                 <div className="flex min-w-0 items-center gap-1 sm:gap-2">
-                    {/* Farmer / Vendor */}
+                    {/* Farmer / Customer */}
                     <div
                         role="tablist"
                         aria-label="Switch mode"
                         className="relative flex shrink-0 rounded-full bg-[#EFE8D6] p-1 text-xs font-medium sm:text-sm"
                     >
-                        {(["farmer", "vendor"] as UserRole[]).map((r) => (
+                        {(["farmer", "customer"] as UserRole[]).map((r) => (
                             <button
                                 key={r}
                                 role="tab"
@@ -75,7 +75,7 @@ export default function Navbar({ role, onRoleChange }: NavbarProps) {
                                         transition={{ type: "spring", stiffness: 400, damping: 30 }}
                                     />
                                 )}
-                                {r === "farmer" ? t("nav.farmer") : t("nav.vendor")}
+                                {r === "farmer" ? t("nav.farmer") : t("nav.customer")}
                             </button>
                         ))}
                     </div>

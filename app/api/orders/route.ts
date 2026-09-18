@@ -43,7 +43,7 @@ export async function POST(request: Request) {
 
     const result = createOrder({
       offerId: body.offerId,
-      vendorId: body.vendorId,
+      customerId: body.customerId,
       quantity: body.quantity,
     });
 

@@ -1,4 +1,4 @@
-// components/VendorMarketplaceFeed.tsx
+// components/CustomerMarketplaceFeed.tsx
 "use client";
 
 import Link from "next/link";
@@ -24,6 +24,12 @@ import {
     Truck,
     CircleCheck,
     Ban,
+    CreditCard,
+    Smartphone,
+    Building2,
+    Banknote,
+    RefreshCw,
+    ShieldCheck,
 } from "lucide-react";
 
 import {
@@ -47,6 +53,7 @@ import {
     getOffers,
     saveOffer,
     cancelOffer,
+    updateOffer,
     type MarketplaceOffer,
 } from "@/lib/marketplaceOffers";
 
@@ -123,7 +130,7 @@ function FreshnessRing({
 /* Props */
 /* -------------------------------------------------- */
 
-interface VendorMarketplaceFeedProps {
+interface CustomerMarketplaceFeedProps {
     listings: CropListing[];
 }
 
@@ -218,12 +225,236 @@ function OfferStatus({
 }
 
 /* -------------------------------------------------- */
-/* Vendor Feed */
+/* Customer Payment Panel */
 /* -------------------------------------------------- */
 
-export default function VendorMarketplaceFeed({
+function CustomerPaymentPanel({
+    offer,
+    onUpdate,
+}: {
+    offer: MarketplaceOffer;
+    onUpdate: () => void;
+}) {
+    const [method, setMethod] = useState<
+        NonNullable<MarketplaceOffer["paymentMethod"]>
+    >(offer.paymentMethod ?? "UPI");
+    const [busy, setBusy] = useState(false);
+    const [error, setError] = useState("");
+
+    const amount =
+        offer.quantity *
+        offer.offeredPricePerUnit;
+
+    const paymentStatus =
+        offer.paymentStatus ?? "PENDING";
+
+    const pay = async () => {
+        setBusy(true);
+        setError("");
+
+        updateOffer(offer.id, {
+            paymentMethod: method,
+            paymentStatus: "PROCESSING",
+        });
+        onUpdate();
+
+        try {
+            // The current marketplace offer flow is localStorage-based,
+            // so this is a demo payment processor. When an orderId is
+            // available, the same state can later be wired to /api/payments.
+            await new Promise((resolve) =>
+                setTimeout(resolve, 900)
+            );
+
+            const transactionId =
+                `KD-TXN-${Date.now()
+                    .toString()
+                    .slice(-8)}`;
+
+            updateOffer(offer.id, {
+                paymentMethod: method,
+                paymentStatus: "PAID",
+                transactionId,
+            });
+            onUpdate();
+        } catch {
+            updateOffer(offer.id, {
+                paymentStatus: "FAILED",
+            });
+            setError("Payment could not be completed.");
+            onUpdate();
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    const retry = () => {
+        updateOffer(offer.id, {
+            paymentStatus: "PENDING",
+        });
+        setError("");
+        onUpdate();
+    };
+
+    return (
+        <div className="mt-5 overflow-hidden rounded-3xl border border-[#E4DCC8] bg-white">
+            <div className="border-b border-[#E4DCC8] bg-[#FBF7EF] p-5">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p className="text-xs font-semibold uppercase tracking-wider text-[#8A8370]">
+                            Customer Payment
+                        </p>
+                        <h4 className="mt-1 font-serif text-xl font-semibold text-[#1B4332]">
+                            Pay the Farmer
+                        </h4>
+                        <p className="mt-1 text-xs text-[#8A8370]">
+                            Payment is made by the customer after the farmer accepts the offer.
+                        </p>
+                    </div>
+                    <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ${
+                        paymentStatus === "PAID"
+                            ? "bg-[#DCEFE3] text-[#1B6B43]"
+                            : paymentStatus === "PROCESSING"
+                            ? "bg-[#EAF1EC] text-[#1B4332]"
+                            : paymentStatus === "FAILED"
+                            ? "bg-[#FCEFE3] text-[#B44822]"
+                            : "bg-[#FFF4D6] text-[#9A6B00]"
+                    }`}>
+                        <span className={`h-2 w-2 rounded-full ${
+                            paymentStatus === "PAID"
+                                ? "bg-[#2D6A4F]"
+                                : paymentStatus === "PROCESSING"
+                                ? "bg-[#6A8F7B]"
+                                : paymentStatus === "FAILED"
+                                ? "bg-[#C4622D]"
+                                : "bg-[#E8A33D]"
+                        }`} />
+                        {paymentStatus === "PAID"
+                            ? "Payment Successful"
+                            : paymentStatus === "PROCESSING"
+                            ? "Payment Processing"
+                            : paymentStatus === "FAILED"
+                            ? "Payment Failed"
+                            : "Payment Pending"}
+                    </span>
+                </div>
+            </div>
+
+            <div className="p-5">
+                <div className="rounded-2xl bg-[#EAF1EC] p-4">
+                    <p className="text-xs text-[#8A8370]">Amount to Pay</p>
+                    <p className="mt-1 font-serif text-3xl font-semibold text-[#1B4332]">
+                        ₹{amount.toLocaleString("en-IN")}
+                    </p>
+                    <p className="mt-1 text-xs text-[#8A8370]">
+                        {offer.quantity} {offer.unit} × ₹{offer.offeredPricePerUnit}/{offer.unit}
+                    </p>
+                </div>
+
+                {paymentStatus === "PAID" && (
+                    <div className="mt-4 rounded-2xl border border-[#B9D9C5] bg-[#EAF1EC] p-4">
+                        <div className="flex items-center gap-3">
+                            <div className="grid h-10 w-10 place-items-center rounded-full bg-[#2D6A4F] text-white">
+                                <CheckCircle className="h-5 w-5" />
+                            </div>
+                            <div>
+                                <p className="font-semibold text-[#1B6B43]">Payment successful</p>
+                                <p className="text-xs text-[#5F786A]">Payment received by the farmer.</p>
+                            </div>
+                        </div>
+                        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                            <div className="rounded-xl bg-white p-3">
+                                <p className="text-[11px] text-[#8A8370]">Method</p>
+                                <p className="mt-1 text-sm font-semibold text-[#1B4332]">
+                                    {method === "UPI"
+                                        ? "UPI"
+                                        : method === "CARD"
+                                        ? "Card"
+                                        : method === "BANK_TRANSFER"
+                                        ? "Bank Transfer"
+                                        : "Cash on Pickup"}
+                                </p>
+                            </div>
+                            <div className="rounded-xl bg-white p-3">
+                                <p className="text-[11px] text-[#8A8370]">Transaction ID</p>
+                                <p className="mt-1 break-all text-sm font-semibold text-[#1B4332]">
+                                    {offer.transactionId ?? "Generated after payment"}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {paymentStatus === "PROCESSING" && (
+                    <div className="mt-4 rounded-2xl bg-[#F1F5F2] p-5 text-center">
+                        <RefreshCw className="mx-auto h-8 w-8 animate-spin text-[#1B4332]" />
+                        <p className="mt-3 font-semibold text-[#1B4332]">Processing payment...</p>
+                        <p className="mt-1 text-xs text-[#8A8370]">Please wait.</p>
+                    </div>
+                )}
+
+                {paymentStatus === "FAILED" && (
+                    <div className="mt-4 rounded-2xl bg-[#FCEFE3] p-4">
+                        <p className="text-sm font-semibold text-[#B44822]">Payment failed.</p>
+                        <button type="button" onClick={retry} className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1B4332] py-3 text-sm font-semibold text-white">
+                            <RefreshCw className="h-4 w-4" /> Retry Payment
+                        </button>
+                    </div>
+                )}
+
+                {paymentStatus === "PENDING" && (
+                    <>
+                        <div className="mt-5 flex items-center gap-2">
+                            <ShieldCheck className="h-5 w-5 text-[#1B4332]" />
+                            <p className="text-sm font-semibold text-[#1B4332]">Choose a payment method</p>
+                        </div>
+
+                        <div className="mt-3 grid gap-3 sm:grid-cols-4">
+                            <button type="button" onClick={() => setMethod("UPI")} className={`rounded-2xl border-2 p-3 text-left ${method === "UPI" ? "border-[#1B4332] bg-[#EAF1EC]" : "border-[#E4DCC8]"}`}>
+                                <Smartphone className="h-5 w-5 text-[#1B4332]" />
+                                <p className="mt-2 text-sm font-semibold text-[#1B4332]">UPI</p>
+                                <p className="text-[11px] text-[#8A8370]">PhonePe / GPay / Paytm</p>
+                            </button>
+
+                            <button type="button" onClick={() => setMethod("CARD")} className={`rounded-2xl border-2 p-3 text-left ${method === "CARD" ? "border-[#1B4332] bg-[#EAF1EC]" : "border-[#E4DCC8]"}`}>
+                                <CreditCard className="h-5 w-5 text-[#1B4332]" />
+                                <p className="mt-2 text-sm font-semibold text-[#1B4332]">Card</p>
+                                <p className="text-[11px] text-[#8A8370]">Debit / Credit</p>
+                            </button>
+
+                            <button type="button" onClick={() => setMethod("BANK_TRANSFER")} className={`rounded-2xl border-2 p-3 text-left ${method === "BANK_TRANSFER" ? "border-[#1B4332] bg-[#EAF1EC]" : "border-[#E4DCC8]"}`}>
+                                <Building2 className="h-5 w-5 text-[#1B4332]" />
+                                <p className="mt-2 text-sm font-semibold text-[#1B4332]">Bank Transfer</p>
+                                <p className="text-[11px] text-[#8A8370]">Direct bank payment</p>
+                            </button>
+
+                            <button type="button" onClick={() => setMethod("PAY_ON_PICKUP")} className={`rounded-2xl border-2 p-3 text-left ${method === "PAY_ON_PICKUP" ? "border-[#1B4332] bg-[#EAF1EC]" : "border-[#E4DCC8]"}`}>
+                                <Banknote className="h-5 w-5 text-[#1B4332]" />
+                                <p className="mt-2 text-sm font-semibold text-[#1B4332]">Cash on Pickup</p>
+                                <p className="text-[11px] text-[#8A8370]">Pay at pickup</p>
+                            </button>
+                        </div>
+
+                        <button type="button" disabled={busy} onClick={pay} className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#E8A33D] py-4 text-sm font-bold text-[#1B4332] shadow-md disabled:opacity-60">
+                            {busy ? <><RefreshCw className="h-4 w-4 animate-spin" /> Processing...</> : <><CreditCard className="h-4 w-4" /> Pay ₹{amount.toLocaleString("en-IN")}</>}
+                        </button>
+                        <p className="mt-2 text-center text-[11px] text-[#8A8370]">Demo payment flow. A real gateway can be connected later.</p>
+                    </>
+                )}
+
+                {error && <p className="mt-3 rounded-xl bg-[#FCEFE3] p-3 text-xs font-semibold text-[#B44822]">{error}</p>}
+            </div>
+        </div>
+    );
+}
+
+/* -------------------------------------------------- */
+/* Customer Feed */
+/* -------------------------------------------------- */
+
+export default function CustomerMarketplaceFeed({
     listings,
-}: VendorMarketplaceFeedProps) {
+}: CustomerMarketplaceFeedProps) {
     const { t } =
         useTranslation();
 
@@ -296,8 +527,8 @@ export default function VendorMarketplaceFeed({
         setMyOffers(
             allOffers.filter(
                 (offer) =>
-                    offer.vendorName ===
-                    "Vendor A"
+                    offer.customerName ===
+                    "Customer A"
             )
         );
     };
@@ -496,10 +727,10 @@ export default function VendorMarketplaceFeed({
                     listingId:
                         offerListing.id,
 
-                    vendorName:
-                        "Vendor A",
+                    customerName:
+                        "Customer A",
 
-                    vendorPhone:
+                    customerPhone:
                         "9999999999",
 
                     farmerId:
@@ -988,7 +1219,7 @@ export default function VendorMarketplaceFeed({
                     <div className="mb-4 flex items-end justify-between">
                         <div>
                             <p className="text-xs font-semibold uppercase tracking-wider text-[#8A8370]">
-                                Vendor
+                                Customer
                             </p>
 
                             <h2 className="font-serif text-2xl font-semibold text-[#1B4332]">
@@ -1094,28 +1325,36 @@ export default function VendorMarketplaceFeed({
 
                                     {offer.status ===
                                         "accepted" && (
-                                        <div className="mt-4 rounded-xl bg-[#EAF1EC] p-4">
-                                            <div className="flex items-center gap-2 text-sm font-semibold text-[#1B4332]">
-                                                <CheckCircle className="h-4 w-4" />
-                                                Offer accepted by farmer
+                                        <>
+                                            <div className="mt-4 rounded-xl bg-[#EAF1EC] p-4">
+                                                <div className="flex items-center gap-2 text-sm font-semibold text-[#1B4332]">
+                                                    <CheckCircle className="h-4 w-4" />
+                                                    Offer accepted by farmer
+                                                </div>
+                                                <p className="mt-1 text-xs text-[#5F786A]">
+                                                    You are now responsible for completing the payment.
+                                                </p>
                                             </div>
 
-                                            <div className="mt-3 flex flex-wrap gap-4 text-xs text-[#3D4A42]">
+                                            <CustomerPaymentPanel
+                                                offer={offer}
+                                                onUpdate={loadMyOffers}
+                                            />
+
+                                            <div className="mt-4 flex flex-wrap gap-4 rounded-xl bg-[#FBF7EF] p-4 text-xs text-[#3D4A42]">
                                                 <span className="flex items-center gap-1">
                                                     <CheckCircle className="h-3.5 w-3.5" />
                                                     Offer Accepted
                                                 </span>
-
-                                                {offer.dealStage ===
+                                                {(offer.dealStage ===
                                                     "pickup-arranged" ||
                                                     offer.dealStage ===
-                                                        "completed" ? (
+                                                        "completed") && (
                                                     <span className="flex items-center gap-1">
                                                         <Truck className="h-3.5 w-3.5" />
                                                         Pickup Arranged
                                                     </span>
-                                                ) : null}
-
+                                                )}
                                                 {offer.dealStage ===
                                                     "completed" && (
                                                     <span className="flex items-center gap-1">
@@ -1124,7 +1363,7 @@ export default function VendorMarketplaceFeed({
                                                     </span>
                                                 )}
                                             </div>
-                                        </div>
+                                        </>
                                     )}
 
                                     {/* Rejected */}

@@ -17,22 +17,22 @@ import type { Language } from "@/types/marketplace";
 const en = {
     // ---------------- NAVBAR ----------------
     "nav.farmer": "Farmer",
-    "nav.vendor": "Vendor",
+    "nav.customer": "Customer",
 
     // ---------------- IMPACT ----------------
     "impact.savedLabel": "Produce Saved from Waste",
     "impact.savedSub": "+{{percent}}% vs last week",
     "impact.earningsLabel": "Direct Farmer Earnings Boost",
     "impact.earningsSub": "vs. mandi middleman price",
-    "impact.dealsLabel": "Active Local Vendor Deals",
+    "impact.dealsLabel": "Active Local Customer Deals",
     "impact.dealsSub": "closing within 15 km radius",
 
     // ---------------- DASHBOARD ----------------
     "dashboard.freshNearYou": "Fresh near you",
-    "dashboard.vendorHeroSubtitle": "Sourced this morning, straight from the field — no middleman markup.",
+    "dashboard.customerHeroSubtitle": "Sourced this morning, straight from the field — no middleman markup.",
     "dashboard.heroTitle": "Your harvest, straight to buyers",
     "dashboard.heroDescription":
-        "List what you've harvested in under a minute. Nearby vendors see it instantly — no middleman, no waiting.",
+        "List what you've harvested in under a minute. Nearby customers see it instantly — no middleman, no waiting.",
     "dashboard.postNewHarvest": "Post New Harvest",
 
     // ---------------- FEED ----------------
@@ -202,22 +202,22 @@ const hi: Record<TranslationKey, string> = {
 
     // NAVBAR
     "nav.farmer": "किसान",
-    "nav.vendor": "विक्रेता",
+    "nav.customer": "ग्राहक",
 
     // IMPACT
     "impact.savedLabel": "बर्बादी से बचाई गई उपज",
     "impact.savedSub": "पिछले सप्ताह की तुलना में +{{percent}}%",
     "impact.earningsLabel": "किसानों की सीधी आय में वृद्धि",
     "impact.earningsSub": "मंडी बिचौलिए की कीमत की तुलना में",
-    "impact.dealsLabel": "सक्रिय स्थानीय विक्रेता सौदे",
+    "impact.dealsLabel": "सक्रिय स्थानीय ग्राहक सौदे",
     "impact.dealsSub": "15 किमी के दायरे में पूरे हो रहे",
 
     // DASHBOARD
     "dashboard.freshNearYou": "आपके पास ताज़ा",
-    "dashboard.vendorHeroSubtitle": "आज सुबह की ताज़ी उपज, सीधे खेत से — कोई बिचौलिया मार्कअप नहीं।",
+    "dashboard.customerHeroSubtitle": "आज सुबह की ताज़ी उपज, सीधे खेत से — कोई बिचौलिया मार्कअप नहीं।",
     "dashboard.heroTitle": "आपकी फसल, सीधे खरीदारों तक",
     "dashboard.heroDescription":
-        "एक मिनट से भी कम समय में अपनी फसल सूचीबद्ध करें। आस-पास के विक्रेता इसे तुरंत देखेंगे — कोई बिचौलिया नहीं, कोई इंतज़ार नहीं।",
+        "एक मिनट से भी कम समय में अपनी फसल सूचीबद्ध करें। आस-पास के ग्राहक इसे तुरंत देखेंगे — कोई बिचौलिया नहीं, कोई इंतज़ार नहीं।",
     "dashboard.postNewHarvest": "नई फसल पोस्ट करें",
 
     // FEED
@@ -367,22 +367,22 @@ const mr: Record<TranslationKey, string> = {
 
     // NAVBAR
     "nav.farmer": "शेतकरी",
-    "nav.vendor": "विक्रेता",
+    "nav.customer": "ग्राहक",
 
     // IMPACT
     "impact.savedLabel": "कचऱ्यापासून वाचवलेला माल",
     "impact.savedSub": "मागील आठवड्याच्या तुलनेत +{{percent}}%",
     "impact.earningsLabel": "शेतकऱ्यांच्या थेट उत्पन्नात वाढ",
     "impact.earningsSub": "मंडईतील दलालाच्या किमतीच्या तुलनेत",
-    "impact.dealsLabel": "सक्रिय स्थानिक विक्रेता व्यवहार",
+    "impact.dealsLabel": "सक्रिय स्थानिक ग्राहक व्यवहार",
     "impact.dealsSub": "15 किमी परिसरात पूर्ण होत आहेत",
 
     // DASHBOARD
     "dashboard.freshNearYou": "तुमच्या जवळचा ताजा माल",
-    "dashboard.vendorHeroSubtitle": "आजच्या सकाळचा ताजा माल, थेट शेतातून — दलालाचा मार्कअप नाही.",
+    "dashboard.customerHeroSubtitle": "आजच्या सकाळचा ताजा माल, थेट शेतातून — दलालाचा मार्कअप नाही.",
     "dashboard.heroTitle": "तुमचे पीक, थेट खरेदीदारांपर्यंत",
     "dashboard.heroDescription":
-        "एका मिनिटापेक्षा कमी वेळात तुमचे पीक नोंदवा. जवळचे विक्रेते ते लगेच पाहतील — दलाल नाही, वाट पाहणे नाही.",
+        "एका मिनिटापेक्षा कमी वेळात तुमचे पीक नोंदवा. जवळचे ग्राहक ते लगेच पाहतील — दलाल नाही, वाट पाहणे नाही.",
     "dashboard.postNewHarvest": "नवीन पीक नोंदवा",
 
     // FEED

@@ -1,4 +1,4 @@
-export type UserRole = "FARMER" | "VENDOR" | "ADMIN";
+export type UserRole = "FARMER" | "CUSTOMER" | "ADMIN";
 
 export interface Farmer {
   id: string;
@@ -26,9 +26,29 @@ export interface Offer {
 export interface Order {
   id: string;
   offerId: string;
-  vendorId: string;
+  customerId: string;
   quantity: number;
   totalAmount: number;
   status: "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
   createdAt: string;
+}
+
+export type PaymentMethod = "UPI" | "CARD" | "COD";
+
+export type PaymentStatus =
+  | "PENDING"
+  | "PROCESSING"
+  | "PAID"
+  | "FAILED"
+  | "REFUNDED";
+
+export interface Payment {
+  id: string;
+  orderId: string;
+  amount: number;
+  method: PaymentMethod;
+  status: PaymentStatus;
+  transactionId?: string;
+  createdAt: string;
+  updatedAt: string;
 }

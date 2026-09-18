@@ -1,6 +1,6 @@
 ﻿export interface CreateOrderValidationInput {
   offerId: unknown;
-  vendorId: unknown;
+  customerId: unknown;
   quantity: unknown;
 }
 
@@ -18,12 +18,12 @@ export function validateCreateOrder(
   }
 
   if (
-    typeof input.vendorId !== "string" ||
-    !input.vendorId.trim()
+    typeof input.customerId !== "string" ||
+    !input.customerId.trim()
   ) {
     return {
       valid: false,
-      error: "vendorId is required",
+      error: "customerId is required",
     };
   }
 

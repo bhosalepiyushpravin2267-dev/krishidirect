@@ -7,9 +7,12 @@ import { Plus, HandCoins, Warehouse } from "lucide-react";
 
 import Navbar from "@/components/navbar";
 import ImpactStats from "@/components/ImpactStats";
-import VendorMarketplaceFeed from "@/components/VendorMarketplaceFeed";
+import CustomerMarketplaceFeed from "@/components/CustomerMarketplaceFeed";
 import CropListingModal from "@/components/CropListingModal";
 import HeroBanner from "@/components/HeroBanner";
+import RecipeAssistant, { type CartItem } from "@/components/RecipeAssistant";
+import DeliveryCheckout, { type PlacedOrder } from "@/components/DeliveryCheckout";
+import OrderTracking from "@/components/OrderTracking";
 
 import { useTranslation } from "@/lib/i18n";
 import type {
@@ -25,7 +28,7 @@ import type {
 const MOCK_METRICS: ImpactMetrics = {
   totalProduceSavedKg: 1420,
   farmerEarningsBoostPercent: 28,
-  activeVendorDeals: 34,
+  activeCustomerDeals: 34,
   weeklyTrendPercent: 12,
 };
 
@@ -182,6 +185,38 @@ export default function DashboardPage() {
   const [modalOpen, setModalOpen] = useState(false);
 
   // -------------------------------------------------------------------------
+  // Recipe Assistant cart + order tracking (Customer view only)
+  // -------------------------------------------------------------------------
+
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [orders, setOrders] = useState<PlacedOrder[]>([]);
+
+  const handleAddToCart = (items: CartItem[]) => {
+    setCart((prev) => [...prev, ...items]);
+  };
+
+  const handleRemoveCartItem = (index: number) => {
+    setCart((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleClearCart = () => {
+    setCart([]);
+  };
+
+  const handlePlaceOrder = (order: PlacedOrder) => {
+    setOrders((prev) => [...prev, order]);
+  };
+
+  const handleOrderStatusChange = (
+    orderId: string,
+    status: PlacedOrder["status"]
+  ) => {
+    setOrders((prev) =>
+      prev.map((o) => (o.id === orderId ? { ...o, status } : o))
+    );
+  };
+
+  // -------------------------------------------------------------------------
   // Create new farmer listing
   // -------------------------------------------------------------------------
 
@@ -258,27 +293,51 @@ export default function DashboardPage() {
         </div>
 
         {/* ================================================================ */}
-        {/* VENDOR VIEW                                                      */}
+        {/* CUSTOMER VIEW                                                      */}
         {/* ================================================================ */}
 
-        {role === "vendor" ? (
+        {role === "customer" ? (
           <>
             <div className="mb-5">
               <HeroBanner
-                imageSrc="/images/vendor-hero.jpg"
-                variant="vendor"
-                eyebrow="MARKETPLACE"
+                imageSrc="/images/customer-hero.jpg"
+                variant="customer"
+                eyebrow="CUSTOMER PORTAL"
                 title={t("dashboard.freshNearYou")}
-                subtitle={t("dashboard.vendorHeroSubtitle")}
+                subtitle={t("dashboard.customerHeroSubtitle")}
               />
             </div>
 
-            <VendorMarketplaceFeed
+            <CustomerMarketplaceFeed
               listings={listings}
             />
 
             {/* ============================================================ */}
-            {/* STORAGE & COLD CHAIN — VENDOR ENTRY POINT                    */}
+            {/* RECIPE ASSISTANT + DELIVERY CHECKOUT + ORDER TRACKING          */}
+            {/* ============================================================ */}
+
+            <div className="mt-6">
+              <RecipeAssistant onAddToCart={handleAddToCart} />
+            </div>
+
+            <div className="mt-6">
+              <DeliveryCheckout
+                cart={cart}
+                onRemoveItem={handleRemoveCartItem}
+                onClearCart={handleClearCart}
+                onPlaceOrder={handlePlaceOrder}
+              />
+            </div>
+
+            <div className="mt-6">
+              <OrderTracking
+                orders={orders}
+                onStatusChange={handleOrderStatusChange}
+              />
+            </div>
+
+            {/* ============================================================ */}
+            {/* STORAGE & COLD CHAIN — CUSTOMER ENTRY POINT                    */}
             {/* ============================================================ */}
 
             <div className="mt-6 rounded-3xl border border-[#E4DCC8] bg-white p-5 shadow-sm sm:p-6">
@@ -362,7 +421,7 @@ export default function DashboardPage() {
                       </h2>
 
                       <p className="text-xs text-[#8A8370]">
-                        View and manage offers from vendors
+                        View and manage offers from customers
                       </p>
 
                     </div>

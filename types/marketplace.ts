@@ -16,7 +16,7 @@ export type Language = "en" | "hi" | "mr";
 
 export type QualityGrade = "organic" | "standard";
 
-export type UserRole = "farmer" | "vendor";
+export type UserRole = "farmer" | "customer";
 
 /** A single farmer-listed harvest, the atomic unit of the marketplace feed. */
 export interface CropListing {
@@ -35,7 +35,7 @@ export interface CropListing {
     photoUrl?: string;
     village: string;
     district: string;
-    /** Straight-line distance in km from the current vendor's location, computed server-side. */
+    /** Straight-line distance in km from the current customer's location, computed server-side. */
     distanceKm?: number;
     latitude: number;
     longitude: number;
@@ -58,7 +58,7 @@ export interface FarmerProfile {
     isVerified: boolean;
 }
 
-/** The live filter state a vendor manipulates on the marketplace feed. */
+/** The live filter state a customer manipulates on the marketplace feed. */
 export interface BuyerFilter {
     searchQuery: string;
     category: Category | "all";
@@ -73,7 +73,7 @@ export interface BuyerFilter {
 export interface ImpactMetrics {
     totalProduceSavedKg: number;
     farmerEarningsBoostPercent: number;
-    activeVendorDeals: number;
+    activeCustomerDeals: number;
     /** Trailing delta vs. previous period, purely cosmetic for the demo but keeps the shape realistic. */
     weeklyTrendPercent: number;
 }

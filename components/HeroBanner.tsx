@@ -8,7 +8,7 @@ import type { ReactNode } from "react";
 interface HeroBannerProps {
   /** Path to a local image in /public, e.g. "/images/farmer-hero.jpg" */
   imageSrc: string;
-  variant: "farmer" | "vendor";
+  variant: "farmer" | "customer";
   eyebrow?: string;
   title: string;
   subtitle?: string;
@@ -16,13 +16,13 @@ interface HeroBannerProps {
 }
 
 /**
- * Photo-backed hero banner used on both the farmer and vendor views —
+ * Photo-backed hero banner used on both the farmer and customer views —
  * deliberately styled differently per variant so the two roles feel visually
  * distinct rather than reusing one template with a different photo dropped in:
  *
  *  - farmer: taller, warm bottom-up scrim, amber glow, content anchored low
  *    (mirrors "golden hour in the field" — this is the primary CTA surface)
- *  - vendor: shorter, cooler diagonal scrim, emerald glow, content centered
+ *  - customer: shorter, cooler diagonal scrim, emerald glow, content centered
  *    (mirrors "fresh market morning" — this sits above a data-dense feed,
  *    so it stays compact rather than competing for space)
  *

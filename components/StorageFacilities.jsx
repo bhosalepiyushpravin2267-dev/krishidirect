@@ -450,7 +450,7 @@ export default function StorageFacilities() {
                     </div>
                     <p className="max-w-2xl text-sm text-gray-500 sm:text-base">
                         Find and reserve nearby cold storage, dry warehouses, and godowns
-                        so your harvest reaches vendors fresh — compare capacity,
+                        so your harvest reaches customers fresh — compare capacity,
                         temperature control, and pricing before you commit.
                     </p>
                 </div>

@@ -17,8 +17,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "KrishiDirect — Kisan to Vendor Direct Bridge",
-  description: "Connecting farmers directly with local vendors to cut post-harvest waste.",
+  title: "KrishiDirect — Kisan to Customer Direct Bridge",
+  description: "Connecting farmers directly with local customers to cut post-harvest waste.",
 };
 
 // Next.js renders this into <meta name="viewport" content="width=device-width, initial-scale=1">

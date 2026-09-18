@@ -14,7 +14,7 @@ import type { Order } from "@/types/backend";
 
 export interface CreateOrderInput {
   offerId: string;
-  vendorId: string;
+  customerId: string;
   quantity: number;
 }
 
@@ -59,7 +59,7 @@ export function createOrder(
   const order: Order = {
     id: `order-${Date.now()}`,
     offerId: offer.id,
-    vendorId: input.vendorId,
+    customerId: input.customerId,
     quantity: input.quantity,
     totalAmount: input.quantity * offer.pricePerUnit,
     status: "PENDING",
