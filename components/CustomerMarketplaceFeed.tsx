@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import { createPortal } from "react-dom";
 import {
     useEffect,
     useMemo,
@@ -475,6 +476,17 @@ export default function CustomerMarketplaceFeed({
         setAddedListingId(listing.id);
         setTimeout(() => setAddedListingId((prev) => (prev === listing.id ? null : prev)), 1600);
     };
+
+    // "My Offers" renders via a portal into a slot page.tsx places at the end
+    // of the Customer view, so it appears last on the page without moving
+    // any of the offers state/logic below — this component still owns all
+    // of it exactly as before, only WHERE it paints changes.
+    const [myOffersPortalTarget, setMyOffersPortalTarget] =
+        useState<HTMLElement | null>(null);
+
+    useEffect(() => {
+        setMyOffersPortalTarget(document.getElementById("my-offers-slot"));
+    }, []);
 
     const [
         filter,
@@ -1242,182 +1254,182 @@ export default function CustomerMarketplaceFeed({
             {/* MY OFFERS */}
             {/* ================================================== */}
 
-            {myOffers.length >
-                0 && (
-                    <section className="mt-10">
-                        <div className="mb-4 flex items-end justify-between">
-                            <div>
-                                <p className="text-xs font-semibold uppercase tracking-wider text-[#8A8370]">
-                                    Customer
-                                </p>
+            {myOffers.length > 0 && myOffersPortalTarget && createPortal(
+                <section className="mt-10">
+                    <div className="mb-4 flex items-end justify-between">
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-wider text-[#8A8370]">
+                                Customer
+                            </p>
 
-                                <h2 className="font-serif text-2xl font-semibold text-[#1B4332]">
-                                    My Offers
-                                </h2>
+                            <h2 className="font-serif text-2xl font-semibold text-[#1B4332]">
+                                My Offers
+                            </h2>
 
-                                <p className="mt-1 text-sm text-[#8A8370]">
-                                    Track offers you have sent to farmers.
-                                </p>
-                            </div>
-
-                            <Link
-                                href="/farmer-offers"
-                                className="hidden rounded-xl border border-[#E4DCC8] bg-white px-4 py-2 text-xs font-semibold text-[#1B4332] sm:block"
-                            >
-                                Farmer Offers
-                            </Link>
+                            <p className="mt-1 text-sm text-[#8A8370]">
+                                Track offers you have sent to farmers.
+                            </p>
                         </div>
 
-                        <div className="space-y-4">
-                            {myOffers.map(
-                                (
-                                    offer
-                                ) => (
-                                    <div
-                                        key={
-                                            offer.id
-                                        }
-                                        className="rounded-2xl border border-[#E4DCC8] bg-white p-5 shadow-sm"
-                                    >
-                                        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                                            <div>
-                                                <div className="flex flex-wrap items-center gap-2">
-                                                    <h3 className="font-semibold capitalize text-[#1B4332]">
-                                                        {
-                                                            offer.crop
-                                                        }
-                                                    </h3>
+                        <Link
+                            href="/farmer-offers"
+                            className="hidden rounded-xl border border-[#E4DCC8] bg-white px-4 py-2 text-xs font-semibold text-[#1B4332] sm:block"
+                        >
+                            Farmer Offers
+                        </Link>
+                    </div>
 
-                                                    <OfferStatus
-                                                        status={
-                                                            offer.status
-                                                        }
-                                                    />
-                                                </div>
-
-                                                <p className="mt-1 text-sm text-[#8A8370]">
-                                                    Farmer:{" "}
+                    <div className="space-y-4">
+                        {myOffers.map(
+                            (
+                                offer
+                            ) => (
+                                <div
+                                    key={
+                                        offer.id
+                                    }
+                                    className="rounded-2xl border border-[#E4DCC8] bg-white p-5 shadow-sm"
+                                >
+                                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                        <div>
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <h3 className="font-semibold capitalize text-[#1B4332]">
                                                     {
-                                                        offer.farmerName
+                                                        offer.crop
                                                     }
-                                                </p>
+                                                </h3>
+
+                                                <OfferStatus
+                                                    status={
+                                                        offer.status
+                                                    }
+                                                />
                                             </div>
 
-                                            <div className="text-left sm:text-right">
-                                                <p className="font-serif text-xl font-semibold text-[#C4622D]">
-                                                    ₹
-                                                    {
-                                                        offer.offeredPricePerUnit
-                                                    }
-                                                    /
-                                                    {
-                                                        offer.unit
-                                                    }
-                                                </p>
-
-                                                <p className="text-xs text-[#8A8370]">
-                                                    {
-                                                        offer.quantity
-                                                    }{" "}
-                                                    {
-                                                        offer.unit
-                                                    }
-                                                </p>
-                                            </div>
+                                            <p className="mt-1 text-sm text-[#8A8370]">
+                                                Farmer:{" "}
+                                                {
+                                                    offer.farmerName
+                                                }
+                                            </p>
                                         </div>
 
-                                        {/* Pending */}
+                                        <div className="text-left sm:text-right">
+                                            <p className="font-serif text-xl font-semibold text-[#C4622D]">
+                                                ₹
+                                                {
+                                                    offer.offeredPricePerUnit
+                                                }
+                                                /
+                                                {
+                                                    offer.unit
+                                                }
+                                            </p>
 
-                                        {offer.status ===
-                                            "pending" && (
-                                                <div className="mt-4 flex items-center justify-between rounded-xl bg-[#FFF4D6] p-3">
-                                                    <div className="flex items-center gap-2 text-sm text-[#9A6B00]">
-                                                        <Clock className="h-4 w-4" />
-                                                        Waiting for farmer's response
-                                                    </div>
-
-                                                    <button
-                                                        onClick={() =>
-                                                            handleCancelOffer(
-                                                                offer
-                                                            )
-                                                        }
-                                                        className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-[#B44822] shadow-sm"
-                                                    >
-                                                        <Ban className="h-3.5 w-3.5" />
-                                                        Cancel Offer
-                                                    </button>
-                                                </div>
-                                            )}
-
-                                        {/* Accepted */}
-
-                                        {offer.status ===
-                                            "accepted" && (
-                                                <>
-                                                    <div className="mt-4 rounded-xl bg-[#EAF1EC] p-4">
-                                                        <div className="flex items-center gap-2 text-sm font-semibold text-[#1B4332]">
-                                                            <CheckCircle className="h-4 w-4" />
-                                                            Offer accepted by farmer
-                                                        </div>
-                                                        <p className="mt-1 text-xs text-[#5F786A]">
-                                                            You are now responsible for completing the payment.
-                                                        </p>
-                                                    </div>
-
-                                                    <CustomerPaymentPanel
-                                                        offer={offer}
-                                                        onUpdate={loadMyOffers}
-                                                    />
-
-                                                    <div className="mt-4 flex flex-wrap gap-4 rounded-xl bg-[#FBF7EF] p-4 text-xs text-[#3D4A42]">
-                                                        <span className="flex items-center gap-1">
-                                                            <CheckCircle className="h-3.5 w-3.5" />
-                                                            Offer Accepted
-                                                        </span>
-                                                        {(offer.dealStage ===
-                                                            "pickup-arranged" ||
-                                                            offer.dealStage ===
-                                                            "completed") && (
-                                                                <span className="flex items-center gap-1">
-                                                                    <Truck className="h-3.5 w-3.5" />
-                                                                    Pickup Arranged
-                                                                </span>
-                                                            )}
-                                                        {offer.dealStage ===
-                                                            "completed" && (
-                                                                <span className="flex items-center gap-1">
-                                                                    <CircleCheck className="h-3.5 w-3.5" />
-                                                                    Completed
-                                                                </span>
-                                                            )}
-                                                    </div>
-                                                </>
-                                            )}
-
-                                        {/* Rejected */}
-
-                                        {offer.status ===
-                                            "rejected" && (
-                                                <div className="mt-4 rounded-xl bg-[#FCEFE3] p-3 text-sm font-semibold text-[#B44822]">
-                                                    The farmer rejected this offer.
-                                                </div>
-                                            )}
-
-                                        {/* Cancelled */}
-
-                                        {offer.status ===
-                                            "cancelled" && (
-                                                <div className="mt-4 rounded-xl bg-[#F1F1F1] p-3 text-sm font-semibold text-[#666666]">
-                                                    You cancelled this offer.
-                                                </div>
-                                            )}
+                                            <p className="text-xs text-[#8A8370]">
+                                                {
+                                                    offer.quantity
+                                                }{" "}
+                                                {
+                                                    offer.unit
+                                                }
+                                            </p>
+                                        </div>
                                     </div>
-                                )
-                            )}
-                        </div>
-                    </section>
-                )}
+
+                                    {/* Pending */}
+
+                                    {offer.status ===
+                                        "pending" && (
+                                            <div className="mt-4 flex items-center justify-between rounded-xl bg-[#FFF4D6] p-3">
+                                                <div className="flex items-center gap-2 text-sm text-[#9A6B00]">
+                                                    <Clock className="h-4 w-4" />
+                                                    Waiting for farmer's response
+                                                </div>
+
+                                                <button
+                                                    onClick={() =>
+                                                        handleCancelOffer(
+                                                            offer
+                                                        )
+                                                    }
+                                                    className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-[#B44822] shadow-sm"
+                                                >
+                                                    <Ban className="h-3.5 w-3.5" />
+                                                    Cancel Offer
+                                                </button>
+                                            </div>
+                                        )}
+
+                                    {/* Accepted */}
+
+                                    {offer.status ===
+                                        "accepted" && (
+                                            <>
+                                                <div className="mt-4 rounded-xl bg-[#EAF1EC] p-4">
+                                                    <div className="flex items-center gap-2 text-sm font-semibold text-[#1B4332]">
+                                                        <CheckCircle className="h-4 w-4" />
+                                                        Offer accepted by farmer
+                                                    </div>
+                                                    <p className="mt-1 text-xs text-[#5F786A]">
+                                                        You are now responsible for completing the payment.
+                                                    </p>
+                                                </div>
+
+                                                <CustomerPaymentPanel
+                                                    offer={offer}
+                                                    onUpdate={loadMyOffers}
+                                                />
+
+                                                <div className="mt-4 flex flex-wrap gap-4 rounded-xl bg-[#FBF7EF] p-4 text-xs text-[#3D4A42]">
+                                                    <span className="flex items-center gap-1">
+                                                        <CheckCircle className="h-3.5 w-3.5" />
+                                                        Offer Accepted
+                                                    </span>
+                                                    {(offer.dealStage ===
+                                                        "pickup-arranged" ||
+                                                        offer.dealStage ===
+                                                        "completed") && (
+                                                            <span className="flex items-center gap-1">
+                                                                <Truck className="h-3.5 w-3.5" />
+                                                                Pickup Arranged
+                                                            </span>
+                                                        )}
+                                                    {offer.dealStage ===
+                                                        "completed" && (
+                                                            <span className="flex items-center gap-1">
+                                                                <CircleCheck className="h-3.5 w-3.5" />
+                                                                Completed
+                                                            </span>
+                                                        )}
+                                                </div>
+                                            </>
+                                        )}
+
+                                    {/* Rejected */}
+
+                                    {offer.status ===
+                                        "rejected" && (
+                                            <div className="mt-4 rounded-xl bg-[#FCEFE3] p-3 text-sm font-semibold text-[#B44822]">
+                                                The farmer rejected this offer.
+                                            </div>
+                                        )}
+
+                                    {/* Cancelled */}
+
+                                    {offer.status ===
+                                        "cancelled" && (
+                                            <div className="mt-4 rounded-xl bg-[#F1F1F1] p-3 text-sm font-semibold text-[#666666]">
+                                                You cancelled this offer.
+                                            </div>
+                                        )}
+                                </div>
+                            )
+                        )}
+                    </div>
+                </section>,
+                myOffersPortalTarget
+            )}
 
             {/* ================================================== */}
             {/* OFFER MODAL */}

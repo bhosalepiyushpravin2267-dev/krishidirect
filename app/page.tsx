@@ -374,6 +374,11 @@ export default function DashboardPage() {
                 onStatusChange={handleOrderStatusChange}
               />
             </div>
+
+            {/* CustomerMarketplaceFeed portals its "My Offers" section into
+                this slot so it always renders last, regardless of where the
+                rest of that component sits in the tree above. */}
+            <div id="my-offers-slot" className="mt-6" />
           </>
         ) : (
 
