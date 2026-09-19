@@ -281,6 +281,18 @@ export default function DashboardPage() {
       <Navbar
         role={role}
         onRoleChange={setRole}
+        cartCount={cart.length}
+        onCartClick={() => {
+          if (role !== "customer") setRole("customer");
+          // Wait a tick for the customer view (and #delivery-checkout) to
+          // actually mount before scrolling to it, in case we just switched
+          // roles or navigated here from a different route.
+          setTimeout(() => {
+            document
+              .getElementById("delivery-checkout")
+              ?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }, 50);
+        }}
       />
 
       <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
@@ -320,7 +332,7 @@ export default function DashboardPage() {
               <RecipeAssistant onAddToCart={handleAddToCart} />
             </div>
 
-            <div className="mt-6">
+            <div className="mt-6" id="delivery-checkout">
               <DeliveryCheckout
                 cart={cart}
                 onRemoveItem={handleRemoveCartItem}
@@ -334,36 +346,6 @@ export default function DashboardPage() {
                 orders={orders}
                 onStatusChange={handleOrderStatusChange}
               />
-            </div>
-
-            {/* ============================================================ */}
-            {/* STORAGE & COLD CHAIN — CUSTOMER ENTRY POINT                    */}
-            {/* ============================================================ */}
-
-            <div className="mt-6 rounded-3xl border border-[#E4DCC8] bg-white p-5 shadow-sm sm:p-6">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#EAF1EC]">
-                    <Warehouse className="h-5 w-5 text-[#1B4332]" />
-                  </div>
-                  <div>
-                    <h2 className="font-serif text-xl font-semibold text-[#1B4332]">
-                      Storage &amp; Cold Chain
-                    </h2>
-                    <p className="text-xs text-[#8A8370]">
-                      Reserve cold storage near your buyers before bulk pickup
-                    </p>
-                  </div>
-                </div>
-
-                <Link
-                  href="/storage"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#1B4332] px-5 py-3 text-sm font-semibold text-[#FBF7EF] shadow-md transition-all hover:bg-[#2D6A4F] active:scale-[0.98]"
-                >
-                  <Warehouse className="h-4 w-4" />
-                  Find Storage Facilities
-                </Link>
-              </div>
             </div>
           </>
         ) : (

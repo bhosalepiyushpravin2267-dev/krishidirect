@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sprout, Globe, ChevronDown, Check, Brain } from "lucide-react";
+import { Sprout, Globe, ChevronDown, Check, Brain, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
 import type { Language, UserRole } from "@/types/marketplace";
@@ -12,6 +12,8 @@ import { useRouter, usePathname } from "next/navigation";
 interface NavbarProps {
     role: UserRole;
     onRoleChange: (role: UserRole) => void;
+    cartCount?: number;
+    onCartClick?: () => void;
 }
 
 const LANGUAGES: Record<Language, string> = {
@@ -20,7 +22,7 @@ const LANGUAGES: Record<Language, string> = {
     mr: "मराठी",
 };
 
-export default function Navbar({ role, onRoleChange }: NavbarProps) {
+export default function Navbar({ role, onRoleChange, cartCount = 0, onCartClick }: NavbarProps) {
     const [langOpen, setLangOpen] = useState(false);
     const { language, setLanguage, t } = useTranslation();
     const router = useRouter();
@@ -96,6 +98,29 @@ export default function Navbar({ role, onRoleChange }: NavbarProps) {
                         <Brain className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
                         <span className="hidden sm:inline">Decision Engine</span>
                     </button>
+
+                    {/* Cart — Customer role only, icon-only always (no label at
+              any breakpoint) so it never adds to the mobile width budget
+              that the language button already needs. Sits in the fixed
+              (non-scrolling) slot alongside language, same reasoning as
+              that button: this must never be the thing that gets clipped. */}
+                    {role === "customer" && (
+                        <button
+                            onClick={() => {
+                                router.push("/");
+                                onCartClick?.();
+                            }}
+                            aria-label={`Cart, ${cartCount} item${cartCount === 1 ? "" : "s"}`}
+                            className="relative grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[#E4DCC8] bg-white text-[#1B4332] transition-colors hover:border-[#1B4332] sm:h-9 sm:w-9"
+                        >
+                            <ShoppingCart className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
+                            {cartCount > 0 && (
+                                <span className="absolute -right-1 -top-1 grid h-4 min-w-[1rem] place-items-center rounded-full bg-[#C4622D] px-1 text-[10px] font-bold leading-none text-white">
+                                    {cartCount > 9 ? "9+" : cartCount}
+                                </span>
+                            )}
+                        </button>
+                    )}
 
                     {/* Language switcher — shows just the 2-letter code below sm so it can
               never push the row wider than the viewport; full name from sm up. */}
