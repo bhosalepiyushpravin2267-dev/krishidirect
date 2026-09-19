@@ -569,14 +569,27 @@ export default function CustomerMarketplaceFeed({
         const handler = () =>
             loadMyOffers();
 
+        // "storage" fires when the farmer accepts/updates an offer from a
+        // different tab/window — without it, payment/deal status here can
+        // appear stuck until the page is manually reloaded.
         window.addEventListener(
             "krishidirect-offers-updated",
+            handler
+        );
+
+        window.addEventListener(
+            "storage",
             handler
         );
 
         return () => {
             window.removeEventListener(
                 "krishidirect-offers-updated",
+                handler
+            );
+
+            window.removeEventListener(
+                "storage",
                 handler
             );
         };

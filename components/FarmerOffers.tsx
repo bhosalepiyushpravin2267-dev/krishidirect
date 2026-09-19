@@ -243,8 +243,15 @@ export default function FarmerOffers() {
     useEffect(() => {
         loadOffers();
         const handler = () => loadOffers();
+        // The custom event covers updates made in this tab; "storage" is what
+        // fires when the customer pays from a different tab/window, which is
+        // why payment status could appear stuck without a manual refresh.
         window.addEventListener("krishidirect-offers-updated", handler);
-        return () => window.removeEventListener("krishidirect-offers-updated", handler);
+        window.addEventListener("storage", handler);
+        return () => {
+            window.removeEventListener("krishidirect-offers-updated", handler);
+            window.removeEventListener("storage", handler);
+        };
     }, []);
 
     const handleAccept = (offer: MarketplaceOffer) => {

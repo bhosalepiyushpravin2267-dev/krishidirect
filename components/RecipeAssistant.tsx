@@ -12,6 +12,14 @@ export interface CartItem {
   name: string;
   quantityGrams: number;
   pricePerKg: number;
+  /** Present only when this item came from a real marketplace listing
+   * ("Add to Cart" / "Buy Now") rather than a Recipe Assistant ingredient.
+   * Lets a placed order be attributed to the right farmer in
+   * "Offers Received" — Recipe Assistant ingredients have no real farmer
+   * behind them, so these stay undefined for those. */
+  farmerId?: string;
+  farmerName?: string;
+  listingId?: string;
 }
 
 interface RecipeIngredient {

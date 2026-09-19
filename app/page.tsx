@@ -1,7 +1,7 @@
 // app/dashboard/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Plus, HandCoins, Warehouse } from "lucide-react";
 
@@ -13,6 +13,14 @@ import HeroBanner from "@/components/HeroBanner";
 import RecipeAssistant, { type CartItem } from "@/components/RecipeAssistant";
 import DeliveryCheckout, { type PlacedOrder } from "@/components/DeliveryCheckout";
 import OrderTracking from "@/components/OrderTracking";
+import {
+  saveOffer,
+  updateOffer,
+  type MarketplaceOffer,
+  type DealStage,
+  type PaymentMethod as OfferPaymentMethod,
+  type PaymentStatus as OfferPaymentStatus,
+} from "@/lib/marketplaceOffers";
 
 import { useTranslation } from "@/lib/i18n";
 import type {
@@ -171,6 +179,93 @@ const MOCK_LISTINGS: CropListing[] = [
 ];
 
 // ---------------------------------------------------------------------------
+// Bridge: mirror a Buy-Now / cart order into the farmer-facing offers list
+// ---------------------------------------------------------------------------
+// "Offers Received" (FarmerOffers.tsx) previously only ever showed offers
+// made through "Make an Offer" — a direct cart purchase never appeared
+// there at all, no matter what its delivery/payment status was. These
+// pure helpers translate a PlacedOrder into the same MarketplaceOffer
+// shape so it shows up there too, and stays in sync as delivery progresses.
+
+function mapOrderStatusToDealStage(status: PlacedOrder["status"]): DealStage {
+  if (status === "delivered") return "completed";
+  if (status === "out-for-delivery") return "pickup-arranged";
+  return "offer-accepted";
+}
+
+function mapOrderPaymentMethod(
+  method: PlacedOrder["paymentMethod"]
+): OfferPaymentMethod {
+  if (method === "NETBANKING") return "BANK_TRANSFER";
+  if (method === "COD") return "PAY_ON_PICKUP";
+  return method; // "UPI" | "CARD" already match the offer's method names.
+}
+
+interface FarmerCartGroup {
+  farmerId: string;
+  farmerName: string;
+  items: CartItem[];
+}
+
+function groupCartItemsByFarmer(items: CartItem[]): FarmerCartGroup[] {
+  const groups = new Map<string, FarmerCartGroup>();
+  items.forEach((item) => {
+    // Recipe Assistant ingredients carry no real farmerId, so they can't
+    // be attributed to anyone here — only marketplace-listing items can.
+    if (!item.farmerId) return;
+    const existing = groups.get(item.farmerId);
+    if (existing) {
+      existing.items.push(item);
+    } else {
+      groups.set(item.farmerId, {
+        farmerId: item.farmerId,
+        farmerName: item.farmerName ?? "Farmer",
+        items: [item],
+      });
+    }
+  });
+  return Array.from(groups.values());
+}
+
+function buildFarmerOfferFromOrder(
+  order: PlacedOrder,
+  group: FarmerCartGroup
+): MarketplaceOffer {
+  const quantityKg = group.items.reduce(
+    (sum, i) => sum + i.quantityGrams / 1000,
+    0
+  );
+  const amount = group.items.reduce(
+    (sum, i) => sum + (i.quantityGrams / 1000) * i.pricePerKg,
+    0
+  );
+  const pricePerKg = quantityKg > 0 ? amount / quantityKg : 0;
+
+  return {
+    id: `offer-${order.id}-${group.farmerId}`,
+    listingId: group.items[0]?.listingId ?? "",
+    customerName: "Customer A",
+    customerPhone: "9999999999",
+    farmerId: group.farmerId,
+    farmerName: group.farmerName,
+    crop: group.items.map((i) => i.name).join(", "),
+    quantity: Number(quantityKg.toFixed(2)),
+    unit: "kg",
+    offeredPricePerUnit: Number(pricePerKg.toFixed(2)),
+    originalPricePerUnit: Number(pricePerKg.toFixed(2)),
+    // A Buy-Now purchase is already committed — there's no farmer
+    // accept/reject step, so it starts straight at "accepted".
+    status: "accepted",
+    dealStage: mapOrderStatusToDealStage(order.status),
+    orderId: order.id,
+    paymentMethod: mapOrderPaymentMethod(order.paymentMethod),
+    paymentStatus: order.paymentStatus,
+    transactionId: order.transactionId,
+    createdAt: order.placedAt,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Dashboard
 // ---------------------------------------------------------------------------
 
@@ -191,6 +286,35 @@ export default function DashboardPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<PlacedOrder[]>([]);
 
+  // Orders previously lived only in memory, so a page refresh silently
+  // wiped out payment/delivery tracking. Persist to localStorage instead.
+  const ORDERS_STORAGE_KEY = "krishidirect-customer-orders";
+  // Guards the save effect below: without it, the save effect would run on
+  // mount with the initial empty `orders` array before the load effect's
+  // setOrders() update lands, immediately overwriting anything persisted
+  // from a previous session.
+  const [ordersHydrated, setOrdersHydrated] = useState(false);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(ORDERS_STORAGE_KEY);
+      if (stored) setOrders(JSON.parse(stored) as PlacedOrder[]);
+    } catch {
+      // Ignore malformed/unavailable storage — orders simply start empty.
+    } finally {
+      setOrdersHydrated(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!ordersHydrated) return;
+    try {
+      localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
+    } catch {
+      // Storage may be unavailable (e.g. private browsing) — non-fatal.
+    }
+  }, [orders, ordersHydrated]);
+
   const handleAddToCart = (items: CartItem[]) => {
     setCart((prev) => [...prev, ...items]);
   };
@@ -204,6 +328,9 @@ export default function DashboardPage() {
       name: listing.variety ?? listing.category,
       quantityGrams: isQuintal ? listing.quantity * 100_000 : listing.quantity * 1000,
       pricePerKg: isQuintal ? listing.pricePerUnit / 100 : listing.pricePerUnit,
+      farmerId: listing.farmerId,
+      farmerName: listing.farmerName,
+      listingId: listing.id,
     };
   };
 
@@ -228,17 +355,77 @@ export default function DashboardPage() {
     setCart([]);
   };
 
+  // ---------------------------------------------------------------------
+  // Bridge: a direct Buy-Now / cart purchase previously never showed up
+  // for the farmer at all — "Offers Received" only ever read offers made
+  // through "Make an Offer". These helpers (defined below, module-level)
+  // mirror the farmer's share of a placed order into that same offers
+  // list, keyed off the order id, so it appears there too and stays in
+  // sync as delivery status changes.
+  // ---------------------------------------------------------------------
+
   const handlePlaceOrder = (order: PlacedOrder) => {
     setOrders((prev) => [...prev, order]);
+
+    // Keep the local copy for the current browser so the customer UI
+    // updates immediately, but also persist each farmer's order server-side.
+    // The farmer may be using a different browser/device, where localStorage
+    // is completely separate.
+    groupCartItemsByFarmer(order.items).forEach((group) => {
+      const farmerOffer = buildFarmerOfferFromOrder(order, group);
+  
+      saveOffer(farmerOffer);
+  
+      void fetch("/api/marketplace-offers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(farmerOffer),
+      }).catch(() => {
+        // localStorage remains as a same-browser fallback if the API
+        // is temporarily unavailable.
+      });
+    });
   };
 
   const handleOrderStatusChange = (
     orderId: string,
     status: PlacedOrder["status"]
   ) => {
+    // Needed to look up items/payment info for the offer-mirroring step
+    // below — captured before the state update so it reflects this order
+    // regardless of how React batches the setOrders call.
+    const order = orders.find((o) => o.id === orderId);
+
     setOrders((prev) =>
-      prev.map((o) => (o.id === orderId ? { ...o, status } : o))
+      prev.map((o) => {
+        if (o.id !== orderId) return o;
+        // Cash on Delivery is collected once the order actually arrives.
+        const paymentStatus: PlacedOrder["paymentStatus"] =
+          status === "delivered" && o.paymentMethod === "COD"
+            ? "PAID"
+            : o.paymentStatus;
+        return { ...o, status, paymentStatus };
+      })
     );
+
+    if (!order) return;
+
+    const paymentStatus: OfferPaymentStatus =
+      status === "delivered" && order.paymentMethod === "COD"
+        ? "PAID"
+        : order.paymentStatus;
+    const transactionId =
+      status === "delivered" && order.paymentMethod === "COD"
+        ? order.transactionId ?? `KD-COD-${orderId}`
+        : order.transactionId;
+
+    groupCartItemsByFarmer(order.items).forEach((group) => {
+      updateOffer(`offer-${order.id}-${group.farmerId}`, {
+        dealStage: mapOrderStatusToDealStage(status),
+        paymentStatus,
+        transactionId,
+      });
+    });
   };
 
   // -------------------------------------------------------------------------
