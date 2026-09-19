@@ -2,8 +2,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PackageCheck, Truck, Home, MapPin } from "lucide-react";
-import type { PlacedOrder } from "./DeliveryCheckout";
+import { PackageCheck, Truck, Home, MapPin, CreditCard } from "lucide-react";
+import type { PlacedOrder, PaymentMethod, PaymentStatus } from "./DeliveryCheckout";
 
 interface OrderTrackingProps {
   orders: PlacedOrder[];
@@ -29,6 +29,23 @@ const STATUS_META: Record<
     icon: Home,
     className: "bg-[#DCEAE0] text-[#1B4332]",
   },
+};
+
+const PAYMENT_STATUS_META: Record<
+  PaymentStatus,
+  { label: string; className: string; dot: string }
+> = {
+  PENDING: { label: "Payment Pending", className: "bg-[#FFF4D6] text-[#9A6B00]", dot: "bg-[#E8A33D]" },
+  PROCESSING: { label: "Payment Processing", className: "bg-[#EAF1EC] text-[#1B4332]", dot: "bg-[#6A8F7B]" },
+  PAID: { label: "Payment Received", className: "bg-[#DCEFE3] text-[#1B6B43]", dot: "bg-[#2D6A4F]" },
+  FAILED: { label: "Payment Failed", className: "bg-[#FCEFE3] text-[#B44822]", dot: "bg-[#C4622D]" },
+};
+
+const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
+  UPI: "UPI",
+  CARD: "Card",
+  NETBANKING: "Net Banking",
+  COD: "Cash on Delivery",
 };
 
 function formatINR(value: number): string {
@@ -72,6 +89,12 @@ function OrderCard({
   const meta = STATUS_META[order.status];
   const StatusIcon = meta.icon;
 
+  // Orders placed before payment tracking was added won't carry these
+  // fields — fall back so older stored orders still render correctly.
+  const paymentStatus = order.paymentStatus ?? "PENDING";
+  const paymentMethod = order.paymentMethod ?? "COD";
+  const paymentMeta = PAYMENT_STATUS_META[paymentStatus];
+
   return (
     <div className="w-full max-w-full rounded-2xl border border-[#E4DCC8] bg-[#FBF7EF] p-4">
       <div className="mb-2 flex items-start justify-between gap-2">
@@ -99,6 +122,25 @@ function OrderCard({
           {order.delivery.address} — {order.delivery.pincode}
         </span>
       </p>
+
+      <div className="mt-2.5 flex flex-wrap items-center gap-2">
+        <span
+          className={
+            "inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold " +
+            paymentMeta.className
+          }
+        >
+          <span className={"h-1.5 w-1.5 rounded-full " + paymentMeta.dot} />
+          {paymentMeta.label}
+        </span>
+        <span className="inline-flex items-center gap-1 text-[11px] text-[#8A8370]">
+          <CreditCard className="h-3 w-3" />
+          {PAYMENT_METHOD_LABEL[paymentMethod]}
+        </span>
+        {order.transactionId && (
+          <span className="text-[11px] text-[#8A8370]">· {order.transactionId}</span>
+        )}
+      </div>
 
       {/* Progress steps */}
       <div className="mt-3 flex items-center gap-1.5">
