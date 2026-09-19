@@ -367,8 +367,23 @@ export default function DashboardPage() {
   const handlePlaceOrder = (order: PlacedOrder) => {
     setOrders((prev) => [...prev, order]);
 
+    // Keep the local copy for the current browser so the customer UI
+    // updates immediately, but also persist each farmer's order server-side.
+    // The farmer may be using a different browser/device, where localStorage
+    // is completely separate.
     groupCartItemsByFarmer(order.items).forEach((group) => {
-      saveOffer(buildFarmerOfferFromOrder(order, group));
+      const farmerOffer = buildFarmerOfferFromOrder(order, group);
+  
+      saveOffer(farmerOffer);
+  
+      void fetch("/api/marketplace-offers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(farmerOffer),
+      }).catch(() => {
+        // localStorage remains as a same-browser fallback if the API
+        // is temporarily unavailable.
+      });
     });
   };
 
