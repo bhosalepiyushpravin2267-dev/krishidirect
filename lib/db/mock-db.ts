@@ -1,4 +1,5 @@
 ﻿import type { Offer, Order, Payment } from "@/types/backend";
+import type { MarketplaceOffer } from "@/lib/marketplaceOffers";
 
 export const offers: Offer[] = [
   {
@@ -30,3 +31,8 @@ export const offers: Offer[] = [
 export const orders: Order[] = [];
 
 export const payments: Payment[] = [];
+
+// Server-side store for direct marketplace purchases.
+// This keeps customer orders visible to the farmer instead of relying
+// only on browser localStorage.
+export const marketplaceOffers: MarketplaceOffer[] = [];
