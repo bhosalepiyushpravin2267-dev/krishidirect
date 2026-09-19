@@ -17,8 +17,8 @@ import {
 import { useRouter } from "next/navigation";
 
 import {
-    getOffers,
     updateOffer,
+    refreshOffersFromServer,
     type DealStage,
     type MarketplaceOffer,
     type PaymentMethod,
@@ -30,27 +30,27 @@ const DEAL_STAGES: {
     label: string;
     description: string;
 }[] = [
-    {
-        id: "offer-received",
-        label: "Offer Received",
-        description: "Customer has submitted an offer.",
-    },
-    {
-        id: "offer-accepted",
-        label: "Offer Accepted",
-        description: "Farmer accepted the customer's offer.",
-    },
-    {
-        id: "pickup-arranged",
-        label: "Pickup Arranged",
-        description: "Pickup has been arranged.",
-    },
-    {
-        id: "completed",
-        label: "Completed",
-        description: "Transaction completed successfully.",
-    },
-];
+        {
+            id: "offer-received",
+            label: "Offer Received",
+            description: "Customer has submitted an offer.",
+        },
+        {
+            id: "offer-accepted",
+            label: "Offer Accepted",
+            description: "Farmer accepted the customer's offer.",
+        },
+        {
+            id: "pickup-arranged",
+            label: "Pickup Arranged",
+            description: "Pickup has been arranged.",
+        },
+        {
+            id: "completed",
+            label: "Completed",
+            description: "Transaction completed successfully.",
+        },
+    ];
 
 function getStageIndex(stage: DealStage) {
     return DEAL_STAGES.findIndex((item) => item.id === stage);
@@ -238,7 +238,10 @@ export default function FarmerOffers() {
     const router = useRouter();
     const [offers, setOffers] = useState<MarketplaceOffer[]>([]);
 
-    const loadOffers = () => setOffers(getOffers());
+    const loadOffers = async () => {
+        const allOffers = await refreshOffersFromServer();
+        setOffers(allOffers);
+    };
 
     useEffect(() => {
         loadOffers();

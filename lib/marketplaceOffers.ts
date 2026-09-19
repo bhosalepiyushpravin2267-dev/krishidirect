@@ -91,6 +91,57 @@ export function getOffers(): MarketplaceOffer[] {
 }
 
 /* -------------------------------------------------------
+   SYNC WITH SERVER
+------------------------------------------------------- */
+
+export async function refreshOffersFromServer(): Promise<MarketplaceOffer[]> {
+    if (typeof window === "undefined") {
+        return [];
+    }
+
+    try {
+        const response = await fetch("/api/marketplace-offers", {
+            method: "GET",
+            cache: "no-store",
+        });
+
+        if (!response.ok) {
+            return getOffers();
+        }
+
+        const payload = (await response.json()) as {
+            success?: boolean;
+            data?: MarketplaceOffer[];
+        };
+
+        if (!payload.success || !Array.isArray(payload.data)) {
+            return getOffers();
+        }
+
+        // Merge local and server copies by id. Server values win when the
+        // same offer was updated from another browser/device.
+        const merged = new Map<string, MarketplaceOffer>();
+
+        for (const offer of getOffers()) {
+            merged.set(offer.id, offer);
+        }
+
+        for (const offer of payload.data) {
+            merged.set(offer.id, offer);
+        }
+
+        const result = Array.from(merged.values());
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(result));
+        window.dispatchEvent(new Event("krishidirect-offers-updated"));
+
+        return result;
+    } catch {
+        return getOffers();
+    }
+}
+
+/* -------------------------------------------------------
    SAVE NEW OFFER
 ------------------------------------------------------- */
 
@@ -131,6 +182,16 @@ export function saveOffer(
             "krishidirect-offers-updated"
         )
     );
+
+    // Persist the same offer to the server so the farmer can see it even
+    // when the customer and farmer are using different browsers/devices.
+    void fetch("/api/marketplace-offers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(offer),
+    }).catch(() => {
+        // localStorage remains the fallback for the demo.
+    });
 }
 
 /* -------------------------------------------------------
@@ -151,9 +212,9 @@ export function updateOffer(
         offers.map((offer) =>
             offer.id === id
                 ? {
-                      ...offer,
-                      ...updates,
-                  }
+                    ...offer,
+                    ...updates,
+                }
                 : offer
         );
 
@@ -167,7 +228,21 @@ export function updateOffer(
             "krishidirect-offers-updated"
         )
     );
+
+    // Mirror status/deal/payment changes to the server so both sides of the
+    // marketplace see the same offer state.
+    void fetch("/api/marketplace-offers", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            id,
+            updates,
+        }),
+    }).catch(() => {
+        // localStorage remains the fallback for the demo.
+    });
 }
+
 
 /* -------------------------------------------------------
    CANCEL OFFER
@@ -176,34 +251,11 @@ export function updateOffer(
 export function cancelOffer(
     id: string
 ): void {
-    if (typeof window === "undefined") {
-        return;
-    }
-
-    const offers = getOffers();
-
-    const updatedOffers =
-        offers.map((offer) =>
-            offer.id === id
-                ? {
-                      ...offer,
-                      status:
-                          "cancelled" as OfferStatus,
-                  }
-                : offer
-        );
-
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(updatedOffers)
-    );
-
-    window.dispatchEvent(
-        new Event(
-            "krishidirect-offers-updated"
-        )
-    );
+    updateOffer(id, {
+        status: "cancelled",
+    });
 }
+
 
 /* -------------------------------------------------------
    DELETE OFFER

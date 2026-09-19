@@ -54,10 +54,10 @@ import type {
 } from "@/types/marketplace";
 
 import {
-    getOffers,
     saveOffer,
     cancelOffer,
     updateOffer,
+    refreshOffersFromServer,
     type MarketplaceOffer,
 } from "@/lib/marketplaceOffers";
 
@@ -322,20 +322,20 @@ function CustomerPaymentPanel({
                         </p>
                     </div>
                     <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ${paymentStatus === "PAID"
-                            ? "bg-[#DCEFE3] text-[#1B6B43]"
-                            : paymentStatus === "PROCESSING"
-                                ? "bg-[#EAF1EC] text-[#1B4332]"
-                                : paymentStatus === "FAILED"
-                                    ? "bg-[#FCEFE3] text-[#B44822]"
-                                    : "bg-[#FFF4D6] text-[#9A6B00]"
+                        ? "bg-[#DCEFE3] text-[#1B6B43]"
+                        : paymentStatus === "PROCESSING"
+                            ? "bg-[#EAF1EC] text-[#1B4332]"
+                            : paymentStatus === "FAILED"
+                                ? "bg-[#FCEFE3] text-[#B44822]"
+                                : "bg-[#FFF4D6] text-[#9A6B00]"
                         }`}>
                         <span className={`h-2 w-2 rounded-full ${paymentStatus === "PAID"
-                                ? "bg-[#2D6A4F]"
-                                : paymentStatus === "PROCESSING"
-                                    ? "bg-[#6A8F7B]"
-                                    : paymentStatus === "FAILED"
-                                        ? "bg-[#C4622D]"
-                                        : "bg-[#E8A33D]"
+                            ? "bg-[#2D6A4F]"
+                            : paymentStatus === "PROCESSING"
+                                ? "bg-[#6A8F7B]"
+                                : paymentStatus === "FAILED"
+                                    ? "bg-[#C4622D]"
+                                    : "bg-[#E8A33D]"
                             }`} />
                         {paymentStatus === "PAID"
                             ? "Payment Successful"
@@ -550,9 +550,9 @@ export default function CustomerMarketplaceFeed({
     /* Load offers */
     /* -------------------------------------------------- */
 
-    const loadMyOffers = () => {
+    const loadMyOffers = async () => {
         const allOffers =
-            getOffers();
+            await refreshOffersFromServer();
 
         setMyOffers(
             allOffers.filter(
@@ -1224,6 +1224,19 @@ export default function CustomerMarketplaceFeed({
                                                 "feed.whatsapp"
                                             )}
                                         </a>
+                                    </div>
+
+                                    <div className="mt-2">
+                                        <button
+                                            onClick={() =>
+                                                openOfferModal(listing)
+                                            }
+                                            disabled={!listing.isBulkAvailable}
+                                            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-[#C4622D] bg-[#FCEFE3] py-2.5 text-xs font-semibold text-[#C4622D] transition-colors hover:bg-[#F7E2D1] disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                            <Send className="h-3.5 w-3.5" />
+                                            {listing.isBulkAvailable ? "Make an Offer" : "Bulk Offer Unavailable"}
+                                        </button>
                                     </div>
 
                                     <div className="mt-2 flex gap-2">

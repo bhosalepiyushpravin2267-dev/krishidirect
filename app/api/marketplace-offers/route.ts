@@ -83,3 +83,64 @@ export async function POST(request: Request) {
         );
     }
 }
+
+
+export async function PATCH(request: Request) {
+    try {
+        const body = (await request.json()) as {
+            id?: string;
+            updates?: Partial<MarketplaceOffer>;
+        };
+
+        if (
+            typeof body.id !== "string" ||
+            !body.id.trim() ||
+            !body.updates ||
+            typeof body.updates !== "object"
+        ) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    data: null,
+                    error: "Invalid marketplace offer update",
+                },
+                { status: 400 }
+            );
+        }
+
+        const index = marketplaceOffers.findIndex(
+            (item) => item.id === body.id
+        );
+
+        if (index === -1) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    data: null,
+                    error: "Offer not found",
+                },
+                { status: 404 }
+            );
+        }
+
+        marketplaceOffers[index] = {
+            ...marketplaceOffers[index],
+            ...body.updates,
+        };
+
+        return NextResponse.json({
+            success: true,
+            data: marketplaceOffers[index],
+            error: null,
+        });
+    } catch {
+        return NextResponse.json(
+            {
+                success: false,
+                data: null,
+                error: "Invalid request body",
+            },
+            { status: 400 }
+        );
+    }
+}
