@@ -30,6 +30,9 @@ import {
     Banknote,
     RefreshCw,
     ShieldCheck,
+    Zap,
+    Check,
+    ShoppingCart,
 } from "lucide-react";
 
 import {
@@ -106,9 +109,9 @@ function FreshnessRing({
                         score > 0.5
                             ? "#2D6A4F"
                             : score >
-                              0.2
-                            ? "#E8A33D"
-                            : "#C4622D"
+                                0.2
+                                ? "#E8A33D"
+                                : "#C4622D"
                     }
                     strokeWidth="3"
                     strokeLinecap="round"
@@ -132,6 +135,12 @@ function FreshnessRing({
 
 interface CustomerMarketplaceFeedProps {
     listings: CropListing[];
+    /** Adds one listing to the shared cart (page-level state, shared with
+     * Recipe Assistant + Delivery Checkout). */
+    onAddToCart?: (listing: CropListing) => void;
+    /** Same as onAddToCart, but also scrolls straight to checkout —
+     * used by "Buy Now". */
+    onBuyNow?: (listing: CropListing) => void;
 }
 
 /* -------------------------------------------------- */
@@ -139,15 +148,15 @@ interface CustomerMarketplaceFeedProps {
 /* -------------------------------------------------- */
 
 const DEFAULT_FILTER: BuyerFilter =
-    {
-        searchQuery: "",
-        category: "all",
-        maxDistanceKm: 25,
-        minPrice: 0,
-        maxPrice: 10000,
-        quality: "all",
-        sortBy: "freshness",
-    };
+{
+    searchQuery: "",
+    category: "all",
+    maxDistanceKm: 25,
+    minPrice: 0,
+    maxPrice: 10000,
+    quality: "all",
+    sortBy: "freshness",
+};
 
 const SORT_LABEL_KEY: Record<
     BuyerFilter["sortBy"],
@@ -311,31 +320,29 @@ function CustomerPaymentPanel({
                             Payment is made by the customer after the farmer accepts the offer.
                         </p>
                     </div>
-                    <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ${
-                        paymentStatus === "PAID"
+                    <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ${paymentStatus === "PAID"
                             ? "bg-[#DCEFE3] text-[#1B6B43]"
                             : paymentStatus === "PROCESSING"
-                            ? "bg-[#EAF1EC] text-[#1B4332]"
-                            : paymentStatus === "FAILED"
-                            ? "bg-[#FCEFE3] text-[#B44822]"
-                            : "bg-[#FFF4D6] text-[#9A6B00]"
-                    }`}>
-                        <span className={`h-2 w-2 rounded-full ${
-                            paymentStatus === "PAID"
+                                ? "bg-[#EAF1EC] text-[#1B4332]"
+                                : paymentStatus === "FAILED"
+                                    ? "bg-[#FCEFE3] text-[#B44822]"
+                                    : "bg-[#FFF4D6] text-[#9A6B00]"
+                        }`}>
+                        <span className={`h-2 w-2 rounded-full ${paymentStatus === "PAID"
                                 ? "bg-[#2D6A4F]"
                                 : paymentStatus === "PROCESSING"
-                                ? "bg-[#6A8F7B]"
-                                : paymentStatus === "FAILED"
-                                ? "bg-[#C4622D]"
-                                : "bg-[#E8A33D]"
-                        }`} />
+                                    ? "bg-[#6A8F7B]"
+                                    : paymentStatus === "FAILED"
+                                        ? "bg-[#C4622D]"
+                                        : "bg-[#E8A33D]"
+                            }`} />
                         {paymentStatus === "PAID"
                             ? "Payment Successful"
                             : paymentStatus === "PROCESSING"
-                            ? "Payment Processing"
-                            : paymentStatus === "FAILED"
-                            ? "Payment Failed"
-                            : "Payment Pending"}
+                                ? "Payment Processing"
+                                : paymentStatus === "FAILED"
+                                    ? "Payment Failed"
+                                    : "Payment Pending"}
                     </span>
                 </div>
             </div>
@@ -369,10 +376,10 @@ function CustomerPaymentPanel({
                                     {method === "UPI"
                                         ? "UPI"
                                         : method === "CARD"
-                                        ? "Card"
-                                        : method === "BANK_TRANSFER"
-                                        ? "Bank Transfer"
-                                        : "Cash on Pickup"}
+                                            ? "Card"
+                                            : method === "BANK_TRANSFER"
+                                                ? "Bank Transfer"
+                                                : "Cash on Pickup"}
                                 </p>
                             </div>
                             <div className="rounded-xl bg-white p-3">
@@ -454,9 +461,20 @@ function CustomerPaymentPanel({
 
 export default function CustomerMarketplaceFeed({
     listings,
+    onAddToCart,
+    onBuyNow,
 }: CustomerMarketplaceFeedProps) {
     const { t } =
         useTranslation();
+
+    // Brief "Added ✓" feedback on the "Add to Cart" button, per listing.
+    const [addedListingId, setAddedListingId] = useState<string | null>(null);
+
+    const handleAddToCartClick = (listing: CropListing) => {
+        onAddToCart?.(listing);
+        setAddedListingId(listing.id);
+        setTimeout(() => setAddedListingId((prev) => (prev === listing.id ? null : prev)), 1600);
+    };
 
     const [
         filter,
@@ -572,9 +590,9 @@ export default function CustomerMarketplaceFeed({
 
                         if (
                             filter.category !==
-                                "all" &&
+                            "all" &&
                             l.category !==
-                                filter.category
+                            filter.category
                         ) {
                             return false;
                         }
@@ -589,18 +607,18 @@ export default function CustomerMarketplaceFeed({
 
                         if (
                             filter.quality !==
-                                "all" &&
+                            "all" &&
                             l.quality !==
-                                filter.quality
+                            filter.quality
                         ) {
                             return false;
                         }
 
                         if (
                             l.pricePerUnit <
-                                filter.minPrice ||
+                            filter.minPrice ||
                             l.pricePerUnit >
-                                filter.maxPrice
+                            filter.maxPrice
                         ) {
                             return false;
                         }
@@ -610,7 +628,7 @@ export default function CustomerMarketplaceFeed({
                 );
 
             switch (
-                filter.sortBy
+            filter.sortBy
             ) {
                 case "price-asc":
                     result =
@@ -709,9 +727,9 @@ export default function CustomerMarketplaceFeed({
 
             if (
                 offerQuantity <=
-                    0 ||
+                0 ||
                 offerPrice <=
-                    0
+                0
             ) {
                 return;
             }
@@ -721,48 +739,48 @@ export default function CustomerMarketplaceFeed({
             );
 
             const offer: MarketplaceOffer =
-                {
-                    id: `offer-${Date.now()}`,
+            {
+                id: `offer-${Date.now()}`,
 
-                    listingId:
-                        offerListing.id,
+                listingId:
+                    offerListing.id,
 
-                    customerName:
-                        "Customer A",
+                customerName:
+                    "Customer A",
 
-                    customerPhone:
-                        "9999999999",
+                customerPhone:
+                    "9999999999",
 
-                    farmerId:
-                        offerListing.farmerId,
+                farmerId:
+                    offerListing.farmerId,
 
-                    farmerName:
-                        offerListing.farmerName,
+                farmerName:
+                    offerListing.farmerName,
 
-                    crop:
-                        offerListing.category,
+                crop:
+                    offerListing.category,
 
-                    quantity:
-                        offerQuantity,
+                quantity:
+                    offerQuantity,
 
-                    unit:
-                        offerListing.unit,
+                unit:
+                    offerListing.unit,
 
-                    offeredPricePerUnit:
-                        offerPrice,
+                offeredPricePerUnit:
+                    offerPrice,
 
-                    originalPricePerUnit:
-                        offerListing.pricePerUnit,
+                originalPricePerUnit:
+                    offerListing.pricePerUnit,
 
-                    status:
-                        "pending",
+                status:
+                    "pending",
 
-                    dealStage:
-                        "offer-received",
+                dealStage:
+                    "offer-received",
 
-                    createdAt:
-                        new Date().toISOString(),
-                };
+                createdAt:
+                    new Date().toISOString(),
+            };
 
             setTimeout(() => {
                 saveOffer(
@@ -970,7 +988,7 @@ export default function CustomerMarketplaceFeed({
                                     >
                                         {t(
                                             SORT_LABEL_KEY[
-                                                sort
+                                            sort
                                             ]
                                         )}
                                     </button>
@@ -1015,7 +1033,7 @@ export default function CustomerMarketplaceFeed({
                                     >
                                         {t(
                                             QUALITY_LABEL_KEY[
-                                                q
+                                            q
                                             ]
                                         )}
                                     </button>
@@ -1031,7 +1049,7 @@ export default function CustomerMarketplaceFeed({
             {/* ================================================== */}
 
             {filtered.length ===
-            0 ? (
+                0 ? (
                 <div className="rounded-2xl border border-dashed border-[#E4DCC8] bg-white py-14 text-center text-[#8A8370]">
                     {t(
                         "feed.noResults"
@@ -1073,12 +1091,12 @@ export default function CustomerMarketplaceFeed({
 
                                     {listing.quality ===
                                         "organic" && (
-                                        <span className="absolute left-3 top-3 rounded-full bg-[#2D6A4F] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-[#FBF7EF]">
-                                            {t(
-                                                "feed.organicBadge"
-                                            )}
-                                        </span>
-                                    )}
+                                            <span className="absolute left-3 top-3 rounded-full bg-[#2D6A4F] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-[#FBF7EF]">
+                                                {t(
+                                                    "feed.organicBadge"
+                                                )}
+                                            </span>
+                                        )}
 
                                     <div className="absolute right-2 top-2 rounded-full bg-white/90 p-0.5 shadow">
                                         <FreshnessRing
@@ -1183,25 +1201,36 @@ export default function CustomerMarketplaceFeed({
                                         </a>
                                     </div>
 
-                                    <button
-                                        onClick={() =>
-                                            openOfferModal(
-                                                listing
-                                            )
-                                        }
-                                        className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#E8A33D] py-2.5 text-xs font-semibold text-[#1B4332]"
-                                    >
-                                        <Send className="h-3.5 w-3.5" />
-                                        Make an Offer
-                                    </button>
+                                    <div className="mt-2 flex gap-2">
+                                        <button
+                                            onClick={() =>
+                                                onBuyNow?.(listing)
+                                            }
+                                            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#E8A33D] py-2.5 text-xs font-semibold text-[#1B4332] transition-colors hover:bg-[#DB9530]"
+                                        >
+                                            <Zap className="h-3.5 w-3.5" />
+                                            Buy Now
+                                        </button>
 
-                                    {listing.isBulkAvailable && (
-                                        <button className="mt-2 w-full rounded-xl bg-[#1B4332] py-2 text-xs font-semibold text-[#FBF7EF]">
-                                            {t(
-                                                "feed.bookBulk"
+                                        <button
+                                            onClick={() =>
+                                                handleAddToCartClick(listing)
+                                            }
+                                            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#1B4332] py-2.5 text-xs font-semibold text-[#FBF7EF] transition-colors hover:bg-[#2D6A4F]"
+                                        >
+                                            {addedListingId === listing.id ? (
+                                                <>
+                                                    <Check className="h-3.5 w-3.5" />
+                                                    Added
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <ShoppingCart className="h-3.5 w-3.5" />
+                                                    Add to Cart
+                                                </>
                                             )}
                                         </button>
-                                    )}
+                                    </div>
                                 </div>
                             </motion.article>
                         )
@@ -1215,180 +1244,180 @@ export default function CustomerMarketplaceFeed({
 
             {myOffers.length >
                 0 && (
-                <section className="mt-10">
-                    <div className="mb-4 flex items-end justify-between">
-                        <div>
-                            <p className="text-xs font-semibold uppercase tracking-wider text-[#8A8370]">
-                                Customer
-                            </p>
+                    <section className="mt-10">
+                        <div className="mb-4 flex items-end justify-between">
+                            <div>
+                                <p className="text-xs font-semibold uppercase tracking-wider text-[#8A8370]">
+                                    Customer
+                                </p>
 
-                            <h2 className="font-serif text-2xl font-semibold text-[#1B4332]">
-                                My Offers
-                            </h2>
+                                <h2 className="font-serif text-2xl font-semibold text-[#1B4332]">
+                                    My Offers
+                                </h2>
 
-                            <p className="mt-1 text-sm text-[#8A8370]">
-                                Track offers you have sent to farmers.
-                            </p>
+                                <p className="mt-1 text-sm text-[#8A8370]">
+                                    Track offers you have sent to farmers.
+                                </p>
+                            </div>
+
+                            <Link
+                                href="/farmer-offers"
+                                className="hidden rounded-xl border border-[#E4DCC8] bg-white px-4 py-2 text-xs font-semibold text-[#1B4332] sm:block"
+                            >
+                                Farmer Offers
+                            </Link>
                         </div>
 
-                        <Link
-                            href="/farmer-offers"
-                            className="hidden rounded-xl border border-[#E4DCC8] bg-white px-4 py-2 text-xs font-semibold text-[#1B4332] sm:block"
-                        >
-                            Farmer Offers
-                        </Link>
-                    </div>
+                        <div className="space-y-4">
+                            {myOffers.map(
+                                (
+                                    offer
+                                ) => (
+                                    <div
+                                        key={
+                                            offer.id
+                                        }
+                                        className="rounded-2xl border border-[#E4DCC8] bg-white p-5 shadow-sm"
+                                    >
+                                        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                            <div>
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <h3 className="font-semibold capitalize text-[#1B4332]">
+                                                        {
+                                                            offer.crop
+                                                        }
+                                                    </h3>
 
-                    <div className="space-y-4">
-                        {myOffers.map(
-                            (
-                                offer
-                            ) => (
-                                <div
-                                    key={
-                                        offer.id
-                                    }
-                                    className="rounded-2xl border border-[#E4DCC8] bg-white p-5 shadow-sm"
-                                >
-                                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                                        <div>
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                <h3 className="font-semibold capitalize text-[#1B4332]">
-                                                    {
-                                                        offer.crop
-                                                    }
-                                                </h3>
-
-                                                <OfferStatus
-                                                    status={
-                                                        offer.status
-                                                    }
-                                                />
-                                            </div>
-
-                                            <p className="mt-1 text-sm text-[#8A8370]">
-                                                Farmer:{" "}
-                                                {
-                                                    offer.farmerName
-                                                }
-                                            </p>
-                                        </div>
-
-                                        <div className="text-left sm:text-right">
-                                            <p className="font-serif text-xl font-semibold text-[#C4622D]">
-                                                ₹
-                                                {
-                                                    offer.offeredPricePerUnit
-                                                }
-                                                /
-                                                {
-                                                    offer.unit
-                                                }
-                                            </p>
-
-                                            <p className="text-xs text-[#8A8370]">
-                                                {
-                                                    offer.quantity
-                                                }{" "}
-                                                {
-                                                    offer.unit
-                                                }
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    {/* Pending */}
-
-                                    {offer.status ===
-                                        "pending" && (
-                                        <div className="mt-4 flex items-center justify-between rounded-xl bg-[#FFF4D6] p-3">
-                                            <div className="flex items-center gap-2 text-sm text-[#9A6B00]">
-                                                <Clock className="h-4 w-4" />
-                                                Waiting for farmer's response
-                                            </div>
-
-                                            <button
-                                                onClick={() =>
-                                                    handleCancelOffer(
-                                                        offer
-                                                    )
-                                                }
-                                                className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-[#B44822] shadow-sm"
-                                            >
-                                                <Ban className="h-3.5 w-3.5" />
-                                                Cancel Offer
-                                            </button>
-                                        </div>
-                                    )}
-
-                                    {/* Accepted */}
-
-                                    {offer.status ===
-                                        "accepted" && (
-                                        <>
-                                            <div className="mt-4 rounded-xl bg-[#EAF1EC] p-4">
-                                                <div className="flex items-center gap-2 text-sm font-semibold text-[#1B4332]">
-                                                    <CheckCircle className="h-4 w-4" />
-                                                    Offer accepted by farmer
+                                                    <OfferStatus
+                                                        status={
+                                                            offer.status
+                                                        }
+                                                    />
                                                 </div>
-                                                <p className="mt-1 text-xs text-[#5F786A]">
-                                                    You are now responsible for completing the payment.
+
+                                                <p className="mt-1 text-sm text-[#8A8370]">
+                                                    Farmer:{" "}
+                                                    {
+                                                        offer.farmerName
+                                                    }
                                                 </p>
                                             </div>
 
-                                            <CustomerPaymentPanel
-                                                offer={offer}
-                                                onUpdate={loadMyOffers}
-                                            />
+                                            <div className="text-left sm:text-right">
+                                                <p className="font-serif text-xl font-semibold text-[#C4622D]">
+                                                    ₹
+                                                    {
+                                                        offer.offeredPricePerUnit
+                                                    }
+                                                    /
+                                                    {
+                                                        offer.unit
+                                                    }
+                                                </p>
 
-                                            <div className="mt-4 flex flex-wrap gap-4 rounded-xl bg-[#FBF7EF] p-4 text-xs text-[#3D4A42]">
-                                                <span className="flex items-center gap-1">
-                                                    <CheckCircle className="h-3.5 w-3.5" />
-                                                    Offer Accepted
-                                                </span>
-                                                {(offer.dealStage ===
-                                                    "pickup-arranged" ||
-                                                    offer.dealStage ===
-                                                        "completed") && (
-                                                    <span className="flex items-center gap-1">
-                                                        <Truck className="h-3.5 w-3.5" />
-                                                        Pickup Arranged
-                                                    </span>
-                                                )}
-                                                {offer.dealStage ===
-                                                    "completed" && (
-                                                    <span className="flex items-center gap-1">
-                                                        <CircleCheck className="h-3.5 w-3.5" />
-                                                        Completed
-                                                    </span>
-                                                )}
+                                                <p className="text-xs text-[#8A8370]">
+                                                    {
+                                                        offer.quantity
+                                                    }{" "}
+                                                    {
+                                                        offer.unit
+                                                    }
+                                                </p>
                                             </div>
-                                        </>
-                                    )}
-
-                                    {/* Rejected */}
-
-                                    {offer.status ===
-                                        "rejected" && (
-                                        <div className="mt-4 rounded-xl bg-[#FCEFE3] p-3 text-sm font-semibold text-[#B44822]">
-                                            The farmer rejected this offer.
                                         </div>
-                                    )}
 
-                                    {/* Cancelled */}
+                                        {/* Pending */}
 
-                                    {offer.status ===
-                                        "cancelled" && (
-                                        <div className="mt-4 rounded-xl bg-[#F1F1F1] p-3 text-sm font-semibold text-[#666666]">
-                                            You cancelled this offer.
-                                        </div>
-                                    )}
-                                </div>
-                            )
-                        )}
-                    </div>
-                </section>
-            )}
+                                        {offer.status ===
+                                            "pending" && (
+                                                <div className="mt-4 flex items-center justify-between rounded-xl bg-[#FFF4D6] p-3">
+                                                    <div className="flex items-center gap-2 text-sm text-[#9A6B00]">
+                                                        <Clock className="h-4 w-4" />
+                                                        Waiting for farmer's response
+                                                    </div>
+
+                                                    <button
+                                                        onClick={() =>
+                                                            handleCancelOffer(
+                                                                offer
+                                                            )
+                                                        }
+                                                        className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-[#B44822] shadow-sm"
+                                                    >
+                                                        <Ban className="h-3.5 w-3.5" />
+                                                        Cancel Offer
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                        {/* Accepted */}
+
+                                        {offer.status ===
+                                            "accepted" && (
+                                                <>
+                                                    <div className="mt-4 rounded-xl bg-[#EAF1EC] p-4">
+                                                        <div className="flex items-center gap-2 text-sm font-semibold text-[#1B4332]">
+                                                            <CheckCircle className="h-4 w-4" />
+                                                            Offer accepted by farmer
+                                                        </div>
+                                                        <p className="mt-1 text-xs text-[#5F786A]">
+                                                            You are now responsible for completing the payment.
+                                                        </p>
+                                                    </div>
+
+                                                    <CustomerPaymentPanel
+                                                        offer={offer}
+                                                        onUpdate={loadMyOffers}
+                                                    />
+
+                                                    <div className="mt-4 flex flex-wrap gap-4 rounded-xl bg-[#FBF7EF] p-4 text-xs text-[#3D4A42]">
+                                                        <span className="flex items-center gap-1">
+                                                            <CheckCircle className="h-3.5 w-3.5" />
+                                                            Offer Accepted
+                                                        </span>
+                                                        {(offer.dealStage ===
+                                                            "pickup-arranged" ||
+                                                            offer.dealStage ===
+                                                            "completed") && (
+                                                                <span className="flex items-center gap-1">
+                                                                    <Truck className="h-3.5 w-3.5" />
+                                                                    Pickup Arranged
+                                                                </span>
+                                                            )}
+                                                        {offer.dealStage ===
+                                                            "completed" && (
+                                                                <span className="flex items-center gap-1">
+                                                                    <CircleCheck className="h-3.5 w-3.5" />
+                                                                    Completed
+                                                                </span>
+                                                            )}
+                                                    </div>
+                                                </>
+                                            )}
+
+                                        {/* Rejected */}
+
+                                        {offer.status ===
+                                            "rejected" && (
+                                                <div className="mt-4 rounded-xl bg-[#FCEFE3] p-3 text-sm font-semibold text-[#B44822]">
+                                                    The farmer rejected this offer.
+                                                </div>
+                                            )}
+
+                                        {/* Cancelled */}
+
+                                        {offer.status ===
+                                            "cancelled" && (
+                                                <div className="mt-4 rounded-xl bg-[#F1F1F1] p-3 text-sm font-semibold text-[#666666]">
+                                                    You cancelled this offer.
+                                                </div>
+                                            )}
+                                    </div>
+                                )
+                            )}
+                        </div>
+                    </section>
+                )}
 
             {/* ================================================== */}
             {/* OFFER MODAL */}
@@ -1606,11 +1635,11 @@ export default function CustomerMarketplaceFeed({
                                     disabled={
                                         offerSending ||
                                         offerQuantity <=
-                                            0 ||
+                                        0 ||
                                         offerPrice <=
-                                            0 ||
+                                        0 ||
                                         offerQuantity >
-                                            offerListing.quantity
+                                        offerListing.quantity
                                     }
                                     className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#1B4332] py-3.5 text-sm font-semibold text-[#FBF7EF] disabled:cursor-not-allowed disabled:opacity-50"
                                 >

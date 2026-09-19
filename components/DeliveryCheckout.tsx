@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin, Clock, Zap, Truck } from "lucide-react";
+import { MapPin, Clock, Truck } from "lucide-react";
 import type { CartItem } from "./RecipeAssistant";
 
 /* -------------------------------------------------- */
@@ -10,13 +10,11 @@ import type { CartItem } from "./RecipeAssistant";
 /* -------------------------------------------------- */
 
 export type DeliverySlot = "morning" | "afternoon" | "evening";
-export type DeliverySpeed = "standard" | "express";
 
 export interface DeliveryDetails {
   address: string;
   pincode: string;
   slot: DeliverySlot;
-  speed: DeliverySpeed;
 }
 
 export interface PlacedOrder {
@@ -24,7 +22,6 @@ export interface PlacedOrder {
   items: CartItem[];
   delivery: DeliveryDetails;
   itemsTotal: number;
-  deliveryFee: number;
   grandTotal: number;
   status: "placed" | "out-for-delivery" | "delivered";
   placedAt: string;
@@ -43,8 +40,6 @@ const SLOTS: { value: DeliverySlot; label: string }[] = [
   { value: "evening", label: "Evening (5–8 PM)" },
 ];
 
-const EXPRESS_FEE = 49;
-const STANDARD_FEE = 19;
 const PINCODE_PATTERN = /^[1-9][0-9]{5}$/;
 
 function formatINR(value: number): string {
@@ -68,13 +63,13 @@ export default function DeliveryCheckout({
   const [address, setAddress] = useState("");
   const [pincode, setPincode] = useState("");
   const [slot, setSlot] = useState<DeliverySlot>("morning");
-  const [speed, setSpeed] = useState<DeliverySpeed>("standard");
   const [placing, setPlacing] = useState(false);
   const [placedId, setPlacedId] = useState<string | null>(null);
 
+  // No separate delivery fee — delivery cost is folded into vegetable
+  // prices, so grand total is simply the sum of cart items.
   const itemsTotal = cart.reduce((sum, item) => sum + itemCost(item), 0);
-  const deliveryFee = speed === "express" ? EXPRESS_FEE : STANDARD_FEE;
-  const grandTotal = itemsTotal + (cart.length > 0 ? deliveryFee : 0);
+  const grandTotal = itemsTotal;
 
   const isPincodeValid = pincode === "" || PINCODE_PATTERN.test(pincode);
   const canPlaceOrder =
@@ -97,10 +92,6 @@ export default function DeliveryCheckout({
     setSlot(e.target.value as DeliverySlot);
   };
 
-  const handleSpeedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSpeed(e.target.value as DeliverySpeed);
-  };
-
   const handlePlaceOrder = () => {
     if (!canPlaceOrder) return;
     setPlacing(true);
@@ -112,9 +103,8 @@ export default function DeliveryCheckout({
       const order: PlacedOrder = {
         id: `ORD-${Date.now().toString().slice(-6)}`,
         items: cart,
-        delivery: { address: address.trim(), pincode, slot, speed },
+        delivery: { address: address.trim(), pincode, slot },
         itemsTotal,
-        deliveryFee,
         grandTotal,
         status: "placed",
         placedAt: new Date().toISOString(),
@@ -230,61 +220,17 @@ export default function DeliveryCheckout({
             ))}
           </select>
         </div>
-
-        <div>
-          <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-[#3D4A42]">
-            <Zap className="h-3.5 w-3.5" /> Delivery Speed
-          </label>
-          <div className="grid grid-cols-2 gap-2">
-            {(
-              [
-                { value: "standard" as DeliverySpeed, label: "Standard", fee: STANDARD_FEE },
-                { value: "express" as DeliverySpeed, label: "Express", fee: EXPRESS_FEE },
-              ]
-            ).map((option) => (
-              <label
-                key={option.value}
-                className={
-                  "flex cursor-pointer flex-col items-start rounded-xl border-2 px-3.5 py-2.5 text-sm transition-colors " +
-                  (speed === option.value
-                    ? "border-[#1B4332] bg-[#EAF1EC]"
-                    : "border-[#E4DCC8] bg-white")
-                }
-              >
-                <input
-                  type="radio"
-                  name="delivery-speed"
-                  value={option.value}
-                  checked={speed === option.value}
-                  onChange={handleSpeedChange}
-                  className="sr-only"
-                />
-                <span className="font-medium text-[#1B4332]">
-                  {option.label}
-                </span>
-                <span className="text-xs text-[#8A8370]">
-                  {formatINR(option.fee)} delivery fee
-                </span>
-              </label>
-            ))}
-          </div>
-        </div>
       </fieldset>
 
       {cart.length > 0 && (
         <div className="mt-5 space-y-1.5 rounded-xl bg-[#FBF7EF] px-4 py-3">
-          <div className="flex justify-between text-sm text-[#3D4A42]">
-            <span>Items total</span>
-            <span>{formatINR(itemsTotal)}</span>
-          </div>
-          <div className="flex justify-between text-sm text-[#3D4A42]">
-            <span>Delivery fee</span>
-            <span>{formatINR(deliveryFee)}</span>
-          </div>
-          <div className="flex justify-between border-t border-[#E4DCC8] pt-1.5 text-sm font-semibold text-[#1B4332]">
+          <div className="flex justify-between text-sm font-semibold text-[#1B4332]">
             <span>Grand total</span>
             <span>{formatINR(grandTotal)}</span>
           </div>
+          <p className="text-[11px] text-[#8A8370]">
+            Delivery is included in item prices — no separate delivery fee.
+          </p>
         </div>
       )}
 

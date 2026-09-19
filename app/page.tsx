@@ -195,6 +195,31 @@ export default function DashboardPage() {
     setCart((prev) => [...prev, ...items]);
   };
 
+  // A CropListing's quantity/price come in kg or quintal (1 quintal = 100 kg);
+  // the shared cart works in grams + price-per-kg so Recipe Assistant items
+  // and marketplace listings sit in the same cart uniformly.
+  const listingToCartItem = (listing: CropListing): CartItem => {
+    const isQuintal = listing.unit === "quintal";
+    return {
+      name: listing.variety ?? listing.category,
+      quantityGrams: isQuintal ? listing.quantity * 100_000 : listing.quantity * 1000,
+      pricePerKg: isQuintal ? listing.pricePerUnit / 100 : listing.pricePerUnit,
+    };
+  };
+
+  const handleAddListingToCart = (listing: CropListing) => {
+    setCart((prev) => [...prev, listingToCartItem(listing)]);
+  };
+
+  const handleBuyNowListing = (listing: CropListing) => {
+    setCart((prev) => [...prev, listingToCartItem(listing)]);
+    setTimeout(() => {
+      document
+        .getElementById("delivery-checkout")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+  };
+
   const handleRemoveCartItem = (index: number) => {
     setCart((prev) => prev.filter((_, i) => i !== index));
   };
@@ -322,6 +347,8 @@ export default function DashboardPage() {
 
             <CustomerMarketplaceFeed
               listings={listings}
+              onAddToCart={handleAddListingToCart}
+              onBuyNow={handleBuyNowListing}
             />
 
             {/* ============================================================ */}
