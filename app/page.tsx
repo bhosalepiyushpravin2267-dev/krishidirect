@@ -1,7 +1,7 @@
 // app/dashboard/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Plus, HandCoins, Warehouse } from "lucide-react";
 
@@ -190,6 +190,35 @@ export default function DashboardPage() {
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<PlacedOrder[]>([]);
+
+  // Orders previously lived only in memory, so a page refresh silently
+  // wiped out payment/delivery tracking. Persist to localStorage instead.
+  const ORDERS_STORAGE_KEY = "krishidirect-customer-orders";
+  // Guards the save effect below: without it, the save effect would run on
+  // mount with the initial empty `orders` array before the load effect's
+  // setOrders() update lands, immediately overwriting anything persisted
+  // from a previous session.
+  const [ordersHydrated, setOrdersHydrated] = useState(false);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(ORDERS_STORAGE_KEY);
+      if (stored) setOrders(JSON.parse(stored) as PlacedOrder[]);
+    } catch {
+      // Ignore malformed/unavailable storage — orders simply start empty.
+    } finally {
+      setOrdersHydrated(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!ordersHydrated) return;
+    try {
+      localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
+    } catch {
+      // Storage may be unavailable (e.g. private browsing) — non-fatal.
+    }
+  }, [orders, ordersHydrated]);
 
   const handleAddToCart = (items: CartItem[]) => {
     setCart((prev) => [...prev, ...items]);
