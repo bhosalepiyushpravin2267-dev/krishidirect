@@ -238,7 +238,38 @@ export default function FarmerOffers() {
     const router = useRouter();
     const [offers, setOffers] = useState<MarketplaceOffer[]>([]);
 
-    const loadOffers = () => setOffers(getOffers());
+    const loadOffers = async () => {
+        // Local offers make same-browser changes instant.
+        const localOffers = getOffers();
+        setOffers(localOffers);
+    
+        // The server copy makes customer orders visible to a farmer
+        // using another browser/device.
+        try {
+            const response = await fetch("/api/marketplace-offers", {
+                cache: "no-store",
+            });
+    
+            if (!response.ok) return;
+    
+            const payload = (await response.json()) as {
+                success?: boolean;
+                data?: MarketplaceOffer[];
+            };
+    
+            if (!payload.success || !Array.isArray(payload.data)) return;
+    
+            const merged = new Map<string, MarketplaceOffer>();
+    
+            [...localOffers, ...payload.data].forEach((offer) => {
+                merged.set(offer.id, offer);
+            });
+    
+            setOffers(Array.from(merged.values()));
+        } catch {
+            // Keep the local copy if the server cannot be reached.
+        }
+    };
 
     useEffect(() => {
         loadOffers();
