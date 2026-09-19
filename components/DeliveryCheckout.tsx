@@ -2,7 +2,17 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin, Clock, Truck } from "lucide-react";
+import {
+  MapPin,
+  Clock,
+  Truck,
+  Smartphone,
+  CreditCard,
+  Building2,
+  Banknote,
+  ShieldCheck,
+  RefreshCw,
+} from "lucide-react";
 import type { CartItem } from "./RecipeAssistant";
 
 /* -------------------------------------------------- */
@@ -17,6 +27,11 @@ export interface DeliveryDetails {
   slot: DeliverySlot;
 }
 
+/** Up to 4 online payment options available in the customer checkout path. */
+export type PaymentMethod = "UPI" | "CARD" | "NETBANKING" | "COD";
+
+export type PaymentStatus = "PENDING" | "PROCESSING" | "PAID" | "FAILED";
+
 export interface PlacedOrder {
   id: string;
   items: CartItem[];
@@ -24,8 +39,23 @@ export interface PlacedOrder {
   itemsTotal: number;
   grandTotal: number;
   status: "placed" | "out-for-delivery" | "delivered";
+  paymentMethod: PaymentMethod;
+  paymentStatus: PaymentStatus;
+  transactionId?: string;
   placedAt: string;
 }
+
+const PAYMENT_METHODS: {
+  value: PaymentMethod;
+  label: string;
+  hint: string;
+  icon: typeof Smartphone;
+}[] = [
+  { value: "UPI", label: "UPI", hint: "GPay / PhonePe / Paytm", icon: Smartphone },
+  { value: "CARD", label: "Card", hint: "Debit / Credit", icon: CreditCard },
+  { value: "NETBANKING", label: "Net Banking", hint: "All major banks", icon: Building2 },
+  { value: "COD", label: "Cash on Delivery", hint: "Pay when delivered", icon: Banknote },
+];
 
 interface DeliveryCheckoutProps {
   cart: CartItem[];
@@ -63,8 +93,11 @@ export default function DeliveryCheckout({
   const [address, setAddress] = useState("");
   const [pincode, setPincode] = useState("");
   const [slot, setSlot] = useState<DeliverySlot>("morning");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("UPI");
   const [placing, setPlacing] = useState(false);
   const [placedId, setPlacedId] = useState<string | null>(null);
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [paymentError, setPaymentError] = useState("");
 
   // No separate delivery fee — delivery cost is folded into vegetable
   // prices, so grand total is simply the sum of cart items.
@@ -92,31 +125,54 @@ export default function DeliveryCheckout({
     setSlot(e.target.value as DeliverySlot);
   };
 
+  const finalizeOrder = (
+    paymentStatus: PaymentStatus,
+    transactionId?: string
+  ) => {
+    const order: PlacedOrder = {
+      id: `ORD-${Date.now().toString().slice(-6)}`,
+      items: cart,
+      delivery: { address: address.trim(), pincode, slot },
+      itemsTotal,
+      grandTotal,
+      status: "placed",
+      paymentMethod,
+      paymentStatus,
+      transactionId,
+      placedAt: new Date().toISOString(),
+    };
+    onPlaceOrder(order);
+    setPlacedId(order.id);
+    setPlacing(false);
+    setPaymentProcessing(false);
+    onClearCart();
+    setAddress("");
+    setPincode("");
+    setTimeout(() => setPlacedId(null), 4000);
+  };
+
   const handlePlaceOrder = () => {
     if (!canPlaceOrder) return;
     setPlacing(true);
+    setPaymentError("");
 
-    // Demo checkout flow — no real payment/logistics gateway wired up yet,
+    // Cash on Delivery skips the online payment step — payment is tracked
+    // as PENDING until it is collected at delivery.
+    if (paymentMethod === "COD") {
+      setTimeout(() => finalizeOrder("PENDING"), 700);
+      return;
+    }
+
+    // Demo online payment flow — no real payment gateway wired up yet,
     // matches the existing "Demo payment flow" pattern already used
-    // elsewhere in the app (see CustomerMarketplaceFeed.tsx).
+    // elsewhere in the app (see CustomerMarketplaceFeed.tsx). The order is
+    // only created once payment succeeds, so payment status is tracked
+    // from the very first order record.
+    setPaymentProcessing(true);
     setTimeout(() => {
-      const order: PlacedOrder = {
-        id: `ORD-${Date.now().toString().slice(-6)}`,
-        items: cart,
-        delivery: { address: address.trim(), pincode, slot },
-        itemsTotal,
-        grandTotal,
-        status: "placed",
-        placedAt: new Date().toISOString(),
-      };
-      onPlaceOrder(order);
-      setPlacedId(order.id);
-      setPlacing(false);
-      onClearCart();
-      setAddress("");
-      setPincode("");
-      setTimeout(() => setPlacedId(null), 4000);
-    }, 700);
+      const transactionId = `KD-TXN-${Date.now().toString().slice(-8)}`;
+      finalizeOrder("PAID", transactionId);
+    }, 900);
   };
 
   return (
@@ -220,6 +276,31 @@ export default function DeliveryCheckout({
             ))}
           </select>
         </div>
+
+        <div>
+          <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-[#3D4A42]">
+            <ShieldCheck className="h-3.5 w-3.5" /> Payment Method
+          </label>
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+            {PAYMENT_METHODS.map(({ value, label, hint, icon: Icon }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setPaymentMethod(value)}
+                className={
+                  "rounded-2xl border-2 p-3 text-left transition-colors " +
+                  (paymentMethod === value
+                    ? "border-[#1B4332] bg-[#EAF1EC]"
+                    : "border-[#E4DCC8] bg-white")
+                }
+              >
+                <Icon className="h-5 w-5 text-[#1B4332]" />
+                <p className="mt-2 text-sm font-semibold text-[#1B4332]">{label}</p>
+                <p className="text-[11px] text-[#8A8370]">{hint}</p>
+              </button>
+            ))}
+          </div>
+        </div>
       </fieldset>
 
       {cart.length > 0 && (
@@ -234,12 +315,28 @@ export default function DeliveryCheckout({
         </div>
       )}
 
+      {paymentError && (
+        <p className="mt-3 rounded-xl bg-[#FCEFE3] p-3 text-xs font-semibold text-[#B44822]">
+          {paymentError}
+        </p>
+      )}
+
       <button
         onClick={handlePlaceOrder}
         disabled={!canPlaceOrder || placing}
         className="mt-5 w-full rounded-2xl bg-[#1B4332] py-3.5 text-sm font-semibold text-[#FBF7EF] transition-colors hover:bg-[#2D6A4F] disabled:cursor-not-allowed disabled:opacity-40"
       >
-        {placing ? "Placing Order..." : "Place Order"}
+        {paymentProcessing ? (
+          <span className="flex items-center justify-center gap-2">
+            <RefreshCw className="h-4 w-4 animate-spin" /> Processing payment...
+          </span>
+        ) : placing ? (
+          "Placing Order..."
+        ) : paymentMethod === "COD" ? (
+          "Place Order"
+        ) : (
+          `Pay ${formatINR(grandTotal)} & Place Order`
+        )}
       </button>
 
       {placedId && (
