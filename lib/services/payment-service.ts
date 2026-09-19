@@ -23,19 +23,34 @@ export interface CreatePaymentInput {
    CREATE PAYMENT
 ------------------------------------------------------- */
 
-export function createPayment(
+export async function createPayment(
   input: CreatePaymentInput
 ):
-  | {
-      success: true;
-      payment: Payment;
-    }
-  | {
-      success: false;
-      error: string;
-    } {
+  Promise<
+    | {
+        success: true;
+        payment: Payment;
+      }
+    | {
+        success: false;
+        error: string;
+      }
+  > {
+  /*
+   * IMPORTANT:
+   * await works whether getOrderById() returns:
+   *
+   * Order | undefined
+   *
+   * or:
+   *
+   * Promise<Order | undefined>
+   *
+   * This makes the service compatible with both versions
+   * of the order repository.
+   */
   const order =
-    getOrderById(input.orderId);
+    await getOrderById(input.orderId);
 
   if (!order) {
     return {
@@ -64,9 +79,10 @@ export function createPayment(
     };
   }
 
-  if (
-    getPaymentByOrderId(order.id)
-  ) {
+  const existingPayment =
+    getPaymentByOrderId(order.id);
+
+  if (existingPayment) {
     return {
       success: false,
       error:
@@ -78,7 +94,8 @@ export function createPayment(
     new Date().toISOString();
 
   const payment: Payment = {
-    id: `payment-${Date.now()}`,
+    id:
+      `payment-${Date.now()}`,
 
     orderId:
       order.id,
@@ -201,8 +218,9 @@ export function changePaymentStatus(
     return {
       success: false,
       error:
-        `Invalid payment status transition from ` +
-        `${payment.status} to ${status}`,
+        `Invalid payment status transition ` +
+        `from ${payment.status} to ${status}`,
+
       code:
         "INVALID_TRANSITION",
     };
@@ -225,7 +243,9 @@ export function changePaymentStatus(
       success: false,
       error:
         "Unable to update payment",
-      code: "NOT_FOUND",
+
+      code:
+        "NOT_FOUND",
     };
   }
 
