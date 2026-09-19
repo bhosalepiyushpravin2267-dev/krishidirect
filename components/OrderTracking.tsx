@@ -10,7 +10,7 @@ interface OrderTrackingProps {
   onStatusChange: (orderId: string, status: PlacedOrder["status"]) => void;
 }
 
-const STATUS_META: Record<
+const STATUS_META: Record
   PlacedOrder["status"],
   { label: string; icon: typeof PackageCheck; className: string }
 > = {
@@ -31,7 +31,7 @@ const STATUS_META: Record<
   },
 };
 
-const PAYMENT_STATUS_META: Record<
+const PAYMENT_STATUS_META: Record
   PaymentStatus,
   { label: string; className: string; dot: string }
 > = {
