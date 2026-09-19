@@ -48,7 +48,11 @@ export interface MarketplaceOffer {
 
     dealStage: DealStage;
 
-    /** Optional backend order/payment references used when the API is connected. */
+    /**
+     * Optional backend order/payment references.
+     * These are used when the marketplace offer
+     * is connected to the order/payment system.
+     */
     orderId?: string;
     paymentId?: string;
     paymentMethod?: PaymentMethod;
@@ -99,7 +103,23 @@ export function saveOffer(
 
     const offers = getOffers();
 
-    offers.push(offer);
+    /*
+     * Prevent the same offer from being stored twice.
+     */
+    const existingIndex =
+        offers.findIndex(
+            (existingOffer) =>
+                existingOffer.id === offer.id
+        );
+
+    if (existingIndex !== -1) {
+        offers[existingIndex] = {
+            ...offers[existingIndex],
+            ...offer,
+        };
+    } else {
+        offers.push(offer);
+    }
 
     localStorage.setItem(
         STORAGE_KEY,
@@ -167,7 +187,8 @@ export function cancelOffer(
             offer.id === id
                 ? {
                       ...offer,
-                      status: "cancelled" as OfferStatus,
+                      status:
+                          "cancelled" as OfferStatus,
                   }
                 : offer
         );
